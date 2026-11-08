@@ -1,0 +1,449 @@
+/* ===============================================
+   NOVA WEAR — Redesigned Luxury Footer
+   =============================================== */
+
+.footer-root {
+  background: var(--bg-primary, #0A0A0A);
+  border-top: 1px solid var(--border-gold);
+  color: var(--text-secondary, #C8C5BD);
+  font-size: 0.88rem;
+  margin-top: 5rem;
+  position: relative;
+}
+
+body.light-mode .footer-root {
+  background: #F5F2EB;
+  border-top: 1px solid var(--border-gold);
+}
+
+.footer-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Badges Band */
+.footer-badges-band {
+  background: rgba(200, 169, 99, 0.05);
+  border-bottom: 1px solid var(--border-gold);
+  padding: 2.2rem 0;
+}
+
+body.light-mode .footer-badges-band {
+  background: rgba(168, 134, 64, 0.06);
+}
+
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.badge-col {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.badge-ico {
+  font-size: 2.2rem;
+  color: var(--primary-gold, #C8A963);
+  flex-shrink: 0;
+}
+
+.badge-h {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--text-primary);
+  margin: 0 0 0.2rem 0;
+}
+
+.badge-p {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Main Grid */
+.footer-main-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.2fr 1.8fr;
+  gap: 3.5rem;
+  padding-top: 4.5rem;
+  padding-bottom: 4.5rem;
+}
+
+.footer-brand-logo {
+  margin-bottom: 0.5rem;
+}
+
+.footer-heading {
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: var(--primary-gold, #C8A963);
+  text-transform: uppercase;
+  margin: 0 0 1.5rem 0;
+}
+
+.brand-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.brand-statement {
+  line-height: 1.7;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  max-width: 380px;
+}
+
+/* Social & Contact Channels */
+.footer-social-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.social-heading-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+}
+
+.social-pills {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.social-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border-gold);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+
+body.light-mode .social-btn {
+  background: #FFFFFF;
+}
+
+.social-btn:hover {
+  background: var(--primary-gold, #C8A963);
+  color: #0A0A0A;
+  border-color: var(--primary-gold, #C8A963);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px var(--gold-glow);
+}
+
+.social-btn.whatsapp-btn:hover {
+  background: #25D366;
+  border-color: #25D366;
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.35);
+}
+
+/* Nav Lists */
+.footer-nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.footer-nav-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.88rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.footer-nav-link:hover {
+  color: var(--primary-gold, #C8A963);
+  transform: translateX(4px);
+}
+
+[dir="rtl"] .footer-nav-link:hover {
+  transform: translateX(-4px);
+}
+
+.footer-nav-link.highlight-legal {
+  font-weight: 600;
+}
+
+.footer-nav-link.direct-contact {
+  color: var(--primary-gold);
+  font-weight: 700;
+}
+
+/* Newsletter */
+.newsletter-desc {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 1.25rem;
+}
+
+.newsletter-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.newsletter-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.mail-icon {
+  position: absolute;
+  left: 1rem;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+[dir="rtl"] .mail-icon {
+  left: auto;
+  right: 1rem;
+}
+
+.newsletter-input {
+  width: 100%;
+  padding: 0.85rem 3rem 0.85rem 2.8rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-gold);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+body.light-mode .newsletter-input {
+  background: #FFFFFF;
+}
+
+[dir="rtl"] .newsletter-input {
+  padding: 0.85rem 2.8rem 0.85rem 3rem;
+}
+
+.newsletter-input:focus {
+  border-color: var(--primary-gold, #C8A963);
+  box-shadow: 0 0 15px var(--gold-glow);
+}
+
+.newsletter-submit-btn {
+  position: absolute;
+  right: 6px;
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+  background: var(--primary-gold, #C8A963);
+  border: none;
+  color: #0A0A0A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+[dir="rtl"] .newsletter-submit-btn {
+  right: auto;
+  left: 6px;
+}
+
+.newsletter-submit-btn:hover {
+  background: var(--gold-light);
+  transform: scale(1.05);
+}
+
+.subscribe-success-text {
+  font-size: 0.78rem;
+  color: #10B981;
+  font-weight: 600;
+}
+
+/* Bottom Bar */
+.footer-bottom-bar {
+  border-top: 1px solid var(--border-color);
+  padding: 1.5rem 0;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+body.light-mode .footer-bottom-bar {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.bottom-bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.copyright-text {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.payment-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pay-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0.25rem 0.55rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+body.light-mode .pay-badge {
+  background: #FFFFFF;
+}
+
+/* PHASE 13: Dedicated Developer Credit & Professional Attribution */
+.developer-attribution-bar {
+  border-top: 1px solid var(--border-gold);
+  background: rgba(0, 0, 0, 0.55);
+  padding: 1.8rem 0;
+  text-align: center;
+}
+
+body.light-mode .developer-attribution-bar {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.dev-credit-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.dev-credit-lead {
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.dev-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--primary-gold, #C8A963);
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.dev-role {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin: 0;
+  letter-spacing: 0.05em;
+}
+
+.dev-links-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 0.4rem;
+  font-size: 0.82rem;
+}
+
+.dev-portfolio-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--primary-gold, #C8A963);
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-bottom: 1px dashed var(--primary-gold);
+  padding-bottom: 1px;
+}
+
+.dev-portfolio-link:hover {
+  color: var(--gold-light);
+  border-bottom-style: solid;
+  transform: translateY(-1px);
+}
+
+.dev-contact-item {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.dev-contact-item:hover {
+  color: var(--primary-gold);
+}
+
+.dev-dot-separator {
+  color: var(--border-gold);
+  font-size: 0.8rem;
+}
+
+/* Responsiveness */
+@media (max-width: 1024px) {
+  .footer-main-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+  }
+  .badges-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .footer-main-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+  .bottom-bar-inner {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  .payment-badges {
+    justify-content: center;
+  }
+  .dev-links-row {
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .dev-dot-separator {
+    display: none;
+  }
+}

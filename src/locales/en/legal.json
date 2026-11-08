@@ -1,0 +1,98 @@
+{
+  "privacyTitle": "Privacy Policy & Data Protection",
+  "privacySubtitle": "Our unwavering commitment to safeguarding client privacy and personal information at NOVA WEAR",
+  "privacyLastUpdated": "Last Revised: January 2026",
+  "privacySections": [
+    {
+      "id": "intro",
+      "title": "1. Introduction & Scope",
+      "content": "Welcome to NOVA WEAR Haute Couture. Our Maison places the utmost importance on protecting the privacy, confidentiality, and data security of our discerning clients. This policy delineates how personal information is gathered, managed, and safeguاردed throughout your visit and transactional interactions on our digital atelier."
+    },
+    {
+      "id": "collection",
+      "title": "2. Information We Collect",
+      "content": "We collect exclusively the personal credentials necessary to curate and fulfill your sartorial orders: your full legal name, telephone number, email address, physical delivery destination, and purchase transaction history."
+    },
+    {
+      "id": "payment",
+      "title": "3. Payment Security & Integrity",
+      "content": "All monetary transactions on NOVA WEAR are fortified with industry-standard 256-Bit SSL encryption. We never retain full payment card numbers or security CVV codes on our infrastructure; transactions are handled securely through accredited banking gateways and national networks (Meeza, Visa, MasterCard, InstaPay, Vodafone Cash)."
+    },
+    {
+      "id": "usage",
+      "title": "4. Utilization of Client Data",
+      "content": "Data is utilized strictly to dispatch your orders, provide dispatch tracking updates, address inquiries via our private concierge, and transmit exclusive VIP invitations and capsule announcements when explicitly opted-in by the patron."
+    },
+    {
+      "id": "sharing",
+      "title": "5. Third-Party Disclosures",
+      "content": "We strictly never sell, monetize, or lease your personal information to external commercial brokers. Information is shared solely with certified logistical couriers solely for the express purpose of direct hand-delivery to your residence."
+    },
+    {
+      "id": "cookies",
+      "title": "6. Cookies & Analytical Technologies",
+      "content": "We employ functional cookies to maintain your shopping bag across browsing sessions, memorize your currency and linguistic preferences, and ensure an effortless, high-performance shopping journey."
+    },
+    {
+      "id": "rights",
+      "title": "7. Patron Rights & Data Autonomy",
+      "content": "You retain the sovereign right at any juncture to inspect, revise, update, or petition the permanent erasure of your personal data from our registries by contacting our client concierge."
+    },
+    {
+      "id": "contact",
+      "title": "8. Legal Concierge & Inquiries",
+      "content": "For privacy inquiries, please contact our Data Governance Officer directly via email at khameesmohamed942@gmail.com or via telephone at 01274664643."
+    }
+  ],
+  "termsTitle": "Terms & Conditions",
+  "termsSubtitle": "Operational standards, terms of service, and guidelines governing the NOVA WEAR platform",
+  "termsLastUpdated": "Last Revised: January 2026",
+  "termsSections": [
+    {
+      "id": "acceptance",
+      "title": "1. Acceptance of Terms",
+      "content": "By accessing, exploring, or purchasing from NOVA WEAR, you signify full, unconditional consent to these Terms & Conditions. Patrons must possess valid legal capacity to conclude commercial transactions."
+    },
+    {
+      "id": "products",
+      "title": "2. Product Accuracy & Availability",
+      "content": "NOVA WEAR meticulously photographs and describes the materials, finishes, and fits of each luxury creation. Minor hue variations may occur depending on display calibratiom. All pieces are subject to genuine boutique stock availability."
+    },
+    {
+      "id": "pricing",
+      "title": "3. Pricing & Multi-Currency Standards",
+      "content": "All pricing displayed across the store is transparent. Prices may be rendered in Egyptian Pounds (EGP), US Dollars (USD), Euros (EUR), Saudi Riyals (SAR), or UAE Dirhams (AED) based on client selection."
+    },
+    {
+      "id": "orders",
+      "title": "4. Order Confirmation & Acceptance",
+      "content": "The placement of an order constitutes an offer to purchase. NOVA WEAR reserves the right to accept or cancel orders in cases of inventory limitation, unexpected pricing anomalies, or unverified payment transfers."
+    },
+    {
+      "id": "paymentTerms",
+      "title": "5. Payment Methods & Settlement",
+      "content": "We support multiple secure payment instruments including Vodafone Cash, InstaPay IPN, BeePay, Meeza Cards, Visa/Mastercard, and Cash on Delivery. For manual transfer methods, verification occurs upon sender reference confirmation."
+    },
+    {
+      "id": "shipping",
+      "title": "6. Shipping & White-Glove Delivery",
+      "content": "Orders are dispatched via premium logistical couriers within 2 to 5 business days across Egypt and international destinations, with express delivery options available for key metropolitan areas."
+    },
+    {
+      "id": "returns",
+      "title": "7. Return & Exchange Policy",
+      "content": "Clients may return or exchange unworn pieces within 14 days of receipt, provided the garment remains in its pristine original condition with security tags and signature packaging intact."
+    },
+    {
+      "id": "intellectual",
+      "title": "8. Intellectual Property",
+      "content": "All trademarks, emblems, typography, designs, imagery, and written content appearing on this site remain the exclusive intellectual property of NOVA WEAR and are protected by applicable copyright and trademark law."
+    },
+    {
+      "id": "liability",
+      "title": "9. Modifications & Limitation of Liability",
+      "content": "NOVA WEAR reserves the prerogative to revise these Terms & Conditions at any juncture. Modifications take effect upon digital publication, and continued browsing constitutes assent to revised standards."
+    }
+  ]
+}
+

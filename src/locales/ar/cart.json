@@ -1,0 +1,26 @@
+{
+  "title": "سلة المشتريات الفاخرة",
+  "emptyTitle": "سلة التسوق فارغة حالياً",
+  "emptySubtitle": "لم تقم بإضافة أي قطع إلى سلتك بعد. استكشف مجموعاتنا الحصرية وأضف ما يناسب ذوقك الرفيع.",
+  "startShopping": "استكشف المجموعات الآن",
+  "subtotal": "المجموع الجزئي",
+  "shipping": "الشحن والتوصيل",
+  "shippingFree": "مجاني",
+  "freeShippingProgress": "أضف بقيمة {remaining} للحصول على شحن مجاني فاخر!",
+  "freeShippingUnlocked": "✨ تهانينا! مؤهل للشحن السريع المجاني.",
+  "discount": "خصم ترويجي",
+  "tax": "الضريبة التقديرية",
+  "total": "المجموع الإجمالي",
+  "proceedToCheckout": "المتابعة لإتمام الطلب",
+  "remove": "حذف",
+  "quantity": "الكمية",
+  "size": "المقاس",
+  "color": "اللون",
+  "clearCart": "إفراغ السلة",
+  "orderSummary": "ملخص المشتريات",
+  "secureCheckoutGuaranteed": "تسوق آمن ومشفر بأعلى معايير الخصوصية",
+  "promoCodePlaceholder": "أدخل رمز القسيمة الترويجية",
+  "applyPromo": "تطبيق القسيمة",
+  "promoApplied": "تم تطبيق الخصم بنجاح!"
+}
+

@@ -1,0 +1,106 @@
+/* ========== SKELETON BASE ========== */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-tertiary) 25%,
+    var(--bg-secondary) 50%,
+    var(--bg-tertiary) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+  border-radius: var(--radius-md);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-image {
+  border-radius: var(--radius-lg);
+}
+
+.skeleton-text {
+  border-radius: var(--radius-sm);
+}
+
+/* ========== CARD SKELETON ========== */
+.card-skeleton {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  padding: 0;
+}
+
+.card-skeleton-image {
+  width: 100%;
+  height: 200px;
+  background-color: var(--bg-tertiary);
+}
+
+.card-skeleton-content {
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.card-skeleton-content .skeleton {
+  height: 16px;
+}
+
+/* ========== PRODUCT DETAIL SKELETON ========== */
+.product-detail-skeleton {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-2xl);
+}
+
+.detail-skeleton-image {
+  width: 100%;
+  height: 500px;
+  border-radius: var(--radius-lg);
+  background-color: var(--bg-tertiary);
+}
+
+.detail-skeleton-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+@media (max-width: 768px) {
+  .product-detail-skeleton {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-skeleton-image {
+    height: 300px;
+  }
+}
+
+/* ========== TABLE SKELETON ========== */
+.table-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.table-skeleton-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.table-skeleton-row .skeleton {
+  height: 20px;
+}

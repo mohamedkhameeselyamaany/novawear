@@ -1,0 +1,26 @@
+{
+  "title": "Luxury Shopping Bag",
+  "emptyTitle": "Your Shopping Bag is Currently Empty",
+  "emptySubtitle": "You have not selected any sartorial pieces yet. Explore our seasonal runway collections and elevate your personal wardrobe.",
+  "startShopping": "Explore Collections Now",
+  "subtotal": "Subtotal",
+  "shipping": "Express Delivery",
+  "shippingFree": "Complimentary",
+  "freeShippingProgress": "Add {remaining} more to unlock complimentary white-glove shipping!",
+  "freeShippingUnlocked": "✨ Congratulations! Qualified for Complimentary Express Shipping.",
+  "discount": "Promotional Privilege",
+  "tax": "Estimated Tax",
+  "total": "Total Investment",
+  "proceedToCheckout": "Proceed to Secure Checkout",
+  "remove": "Remove",
+  "quantity": "Quantity",
+  "size": "Size",
+  "color": "Color",
+  "clearCart": "Empty Bag",
+  "orderSummary": "Order Summary",
+  "secureCheckoutGuaranteed": "256-Bit Encrypted Secure Checkout Guaranteed",
+  "promoCodePlaceholder": "Enter VIP promo code",
+  "applyPromo": "Apply Code",
+  "promoApplied": "VIP Privilege Applied Successfully!"
+}
+

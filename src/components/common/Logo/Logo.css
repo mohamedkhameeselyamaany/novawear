@@ -1,0 +1,122 @@
+/* ===============================================
+   NOVA WEAR — Official Brand Logo Styles
+   =============================================== */
+
+.logo-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+  user-select: none;
+  text-decoration: none;
+}
+
+.logo-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  outline: none;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+}
+
+.logo-link:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.official-logo-img-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.official-logo-img {
+  object-fit: contain;
+  height: auto;
+  filter: drop-shadow(0 2px 10px rgba(200, 169, 99, 0.35));
+  transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+.logo-link:hover .official-logo-img {
+  filter: drop-shadow(0 4px 16px rgba(200, 169, 99, 0.6));
+  transform: scale(1.03);
+}
+
+body.light-mode .official-logo-img {
+  filter: drop-shadow(0 2px 8px rgba(155, 122, 60, 0.45));
+}
+
+.logo-text-group {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.logo-brand-name {
+  font-family: var(--font-english, 'Intro', 'Poppins', sans-serif);
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: var(--primary-gold, #C8A963);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+body.light-mode .logo-brand-name {
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.logo-subtext {
+  font-family: var(--font-english, 'Intro', 'Poppins', sans-serif);
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.38em;
+  color: var(--text-muted, #999999);
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* Size Variants */
+.logo-sm .logo-brand-name {
+  font-size: 1.15rem;
+  letter-spacing: 0.16em;
+}
+
+.logo-sm .logo-subtext {
+  font-size: 0.52rem;
+  letter-spacing: 0.3em;
+}
+
+.logo-md .logo-brand-name {
+  font-size: 1.4rem;
+}
+
+.logo-lg .logo-brand-name {
+  font-size: 1.9rem;
+  letter-spacing: 0.22em;
+}
+
+.logo-lg .logo-subtext {
+  font-size: 0.72rem;
+  letter-spacing: 0.4em;
+}
+
+.logo-xl .logo-brand-name {
+  font-size: 2.3rem;
+}
+
+/* RTL Adaptations */
+[dir="rtl"] .logo-wrapper {
+  flex-direction: row;
+}
+
+@media (max-width: 640px) {
+  .logo-sm .logo-subtext {
+    display: none;
+  }
+  .logo-wrapper {
+    gap: 0.55rem;
+  }
+}
