@@ -1,7 +1,13 @@
 /** @type {import('next').NextConfig} */
+const isGithubActions = process.env.GITHUB_ACTIONS === 'true';
+
 const nextConfig = {
   reactStrictMode: true,
+  output: isGithubActions ? 'export' : undefined,
+  basePath: isGithubActions ? '/novawear' : '',
+  trailingSlash: true,
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
@@ -16,4 +22,3 @@ const nextConfig = {
 };
 
 export default nextConfig;
-
