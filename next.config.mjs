@@ -6,8 +6,12 @@ const nextConfig = {
   output: isGithubActions ? 'export' : undefined,
   basePath: isGithubActions ? '/novawear' : '',
   trailingSlash: true,
+  env: {
+    NEXT_PUBLIC_BASE_PATH: isGithubActions ? '/novawear' : '',
+  },
   images: {
-    unoptimized: true,
+    loader: 'custom',
+    loaderFile: './src/lib/imageLoader.ts',
     remotePatterns: [
       {
         protocol: 'https',

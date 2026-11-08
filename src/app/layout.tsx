@@ -4,6 +4,8 @@ import Navbar from '@/components/layout/Navbar/Navbar';
 import Footer from '@/components/layout/Footer/Footer';
 import './globals.css';
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
 export const metadata: Metadata = {
   metadataBase: new URL('https://novawear.com'),
   title: 'NOVA WEAR | Haute Couture & Modern Luxury Fashion',
@@ -29,7 +31,7 @@ export const metadata: Metadata = {
     siteName: 'NOVA WEAR',
     images: [
       {
-        url: '/images/men/men-wool-blazer.webp',
+        url: `${basePath}/images/men/men-wool-blazer.webp`,
         width: 800,
         height: 1000,
         alt: 'NOVA WEAR Haute Couture',
@@ -39,7 +41,7 @@ export const metadata: Metadata = {
     type: 'website',
   },
   icons: {
-    icon: '/favicon.ico',
+    icon: `${basePath}/favicon.ico`,
   },
 };
 
