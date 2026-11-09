@@ -2,6 +2,7 @@ import common from './common.json';
 import navigation from './navigation.json';
 import home from './home.json';
 import products from './products.json';
+import productsData from './productsData.json';
 import cart from './cart.json';
 import checkout from './checkout.json';
 import footer from './footer.json';
@@ -22,6 +23,7 @@ export const ar = {
     viewAll: common.viewAll,
   },
   products,
+  productsData,
   cart,
   checkout,
   footer,

@@ -120,3 +120,7 @@
 .category-card:hover .arrow-icon {
   transform: translateX(4px);
 }
+
+[dir="rtl"] .category-card:hover .arrow-icon {
+  transform: translateX(-4px);
+}

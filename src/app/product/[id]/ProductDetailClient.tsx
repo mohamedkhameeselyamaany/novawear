@@ -4,6 +4,12 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Product } from '@/types/product';
 import { useCart, useWishlist, useCurrency, useLanguage, useToast } from '@/hooks';
+import {
+  getProductName,
+  getProductDescription,
+  getProductSubcategory,
+  getProductColor,
+} from '@/utils/localizedProduct';
 import ProductCard from '@/components/products/ProductCard/ProductCard';
 import ProductGallery from '@/components/products/ProductGallery';
 import ProductAssurances from '@/components/products/ProductAssurances';
@@ -40,21 +46,24 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
   const [addedSuccess, setAddedSuccess] = useState<boolean>(false);
 
   const isSaved = isInWishlist(product.id);
+  const displayName = getProductName(product, isRTL);
+  const displayDescription = getProductDescription(product, isRTL);
+  const displaySubcategory = getProductSubcategory(product, isRTL);
 
   const handleWishlistToggle = () => {
     if (isSaved) {
       removeFromWishlist(product.id);
       info(
         isRTL
-          ? `تمت إزالة ${product.name} من قائمة المفضلة.`
-          : `${product.name} removed from your wishlist.`
+          ? `تمت إزالة "${displayName}" من قائمة المفضلة.`
+          : `Removed "${displayName}" from your wishlist.`
       );
     } else {
       addToWishlist(product);
       success(
         isRTL
-          ? `تمت إضافة ${product.name} إلى قائمة المفضلة!`
-          : `${product.name} saved to your wishlist!`
+          ? `تمت إضافة "${displayName}" إلى قائمة المفضلة!`
+          : `Saved "${displayName}" to your wishlist!`
       );
     }
   };
@@ -73,8 +82,8 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
     addToCart(product, quantity, selectedSize, selectedColor);
     success(
       isRTL
-        ? `تمت إضافة (${quantity}) × ${product.name} إلى سلة المشتريات.`
-        : `Added ${quantity} × ${product.name} to your shopping bag.`
+        ? `تمت إضافة (${quantity}) × "${displayName}" إلى سلة المشتريات.`
+        : `Added ${quantity} × "${displayName}" to your shopping bag.`
     );
     setAddedSuccess(true);
 
@@ -137,7 +146,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
         <div className="pdp-info-column">
           <div className="pdp-header">
             <div className="pdp-meta-row">
-              <span className="pdp-subcategory-tag">{product.subcategory}</span>
+              <span className="pdp-subcategory-tag">{displaySubcategory}</span>
               <div className="pdp-rating">
                 <FiStar className="gold-star" />
                 <span className="rating-score">{product.rating.toFixed(1)}</span>
@@ -147,7 +156,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
               </div>
             </div>
 
-            <h1 className="pdp-title">{product.name}</h1>
+            <h1 className="pdp-title">{displayName}</h1>
 
             <div className="pdp-price-row">
               <span className="pdp-price-current">{formatPrice(product.price)}</span>
@@ -168,14 +177,15 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
 
           {/* Description */}
           <div className="pdp-description-box">
-            <p>{product.description}</p>
+            <p>{displayDescription}</p>
           </div>
 
           {/* Color Selection */}
           {product.colors && product.colors.length > 0 && (
             <div className="pdp-option-group">
               <label className="option-label">
-                {isRTL ? 'اللون المختار:' : 'Color:'} <strong>{selectedColor}</strong>
+                {isRTL ? 'اللون المختار:' : 'Color:'}{' '}
+                <strong>{getProductColor(selectedColor, isRTL, product.id)}</strong>
               </label>
               <div className="color-pills-row">
                 {product.colors.map((color) => (
@@ -185,7 +195,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({
                     className={`color-pill-btn ${selectedColor === color ? 'active' : ''}`}
                     onClick={() => setSelectedColor(color)}
                   >
-                    {color}
+                    {getProductColor(color, isRTL, product.id)}
                   </button>
                 ))}
               </div>

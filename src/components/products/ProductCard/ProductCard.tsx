@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Product } from '@/types/product';
 import { useCart, useWishlist, useCurrency, useToast, useLanguage } from '@/hooks';
+import { getProductName, getProductSubcategory } from '@/utils/localizedProduct';
 import { FiHeart, FiShoppingBag, FiStar, FiCheck } from 'react-icons/fi';
 import './ProductCard.css';
 
@@ -24,6 +25,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, priority = fa
   const [justAdded, setJustAdded] = useState(false);
 
   const isSaved = isInWishlist(product.id);
+  const displayName = getProductName(product, isRTL);
+  const displaySubcategory = getProductSubcategory(product, isRTL);
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -31,10 +34,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, priority = fa
 
     if (isSaved) {
       removeFromWishlist(product.id);
-      info(`${product.name} removed from your wishlist.`);
+      info(
+        isRTL
+          ? `تمت إزالة "${displayName}" من قائمة المفضلة.`
+          : `Removed "${displayName}" from your wishlist.`
+      );
     } else {
       addToWishlist(product);
-      success(`${product.name} saved to your wishlist!`);
+      success(
+        isRTL
+          ? `تمت إضافة "${displayName}" إلى قائمة المفضلة!`
+          : `Saved "${displayName}" to your wishlist!`
+      );
     }
   };
 
@@ -51,7 +62,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, priority = fa
       product.sizes?.[0] || 'Standard',
       product.colors?.[0] || 'Default'
     );
-    success(`Added ${product.name} to your shopping bag.`);
+    success(
+      isRTL
+        ? `تمت إضافة "${displayName}" إلى حقيبة التسوق.`
+        : `Added "${displayName}" to your shopping bag.`
+    );
     setJustAdded(true);
 
     setTimeout(() => {
@@ -61,13 +76,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, priority = fa
   };
 
   return (
-    <article className="product-card glass-panel" aria-label={product.name}>
+    <article className="product-card glass-panel" aria-label={displayName}>
       <Link href={`/product/${product.id}`} className="product-card-inner">
         {/* Image Container with Badges */}
         <div className="product-image-box">
           <Image
             src={product.image}
-            alt={product.name}
+            alt={displayName}
             width={400}
             height={520}
             className="product-img"
@@ -95,8 +110,24 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, priority = fa
             type="button"
             className={`wishlist-corner-btn ${isSaved ? 'saved' : ''}`}
             onClick={handleWishlistToggle}
-            title={isSaved ? 'Remove from Wishlist' : 'Add to Wishlist'}
-            aria-label={isSaved ? 'Remove from Wishlist' : 'Add to Wishlist'}
+            title={
+              isSaved
+                ? isRTL
+                  ? 'إزالة من المفضلة'
+                  : 'Remove from Wishlist'
+                : isRTL
+                ? 'إضافة للمفضلة'
+                : 'Add to Wishlist'
+            }
+            aria-label={
+              isSaved
+                ? isRTL
+                  ? 'إزالة من المفضلة'
+                  : 'Remove from Wishlist'
+                : isRTL
+                ? 'إضافة للمفضلة'
+                : 'Add to Wishlist'
+            }
           >
             <FiHeart size={18} fill={isSaved ? 'currentColor' : 'none'} />
           </button>
@@ -111,11 +142,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, priority = fa
             >
               {justAdded ? (
                 <>
-                  <FiCheck /> {t('common.added', 'ADDED')}
+                  <FiCheck /> {isRTL ? 'تمت الإضافة' : t('common.added', 'ADDED')}
                 </>
               ) : (
                 <>
-                  <FiShoppingBag /> {product.inStock ? t('products.quickAdd', 'QUICK ADD') : t('common.outOfStock', 'OUT OF STOCK')}
+                  <FiShoppingBag />{' '}
+                  {product.inStock
+                    ? isRTL
+                      ? 'إضافة سريعة'
+                      : t('products.quickAdd', 'QUICK ADD')
+                    : isRTL
+                    ? 'نفدت الكمية'
+                    : t('common.outOfStock', 'OUT OF STOCK')}
                 </>
               )}
             </button>
@@ -125,7 +163,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, priority = fa
         {/* Product Meta & Info */}
         <div className="product-info-box">
           <div className="product-cat-row">
-            <span className="product-subcategory">{product.subcategory}</span>
+            <span className="product-subcategory">{displaySubcategory}</span>
             <div className="product-rating">
               <FiStar className="star-icon" size={14} />
               <span className="rating-num">{product.rating.toFixed(1)}</span>
@@ -133,7 +171,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, priority = fa
             </div>
           </div>
 
-          <h3 className="product-title">{product.name}</h3>
+          <h3 className="product-title">{displayName}</h3>
 
           <div className="product-price-row">
             <span className="current-price gold-text">{formatPrice(product.price)}</span>

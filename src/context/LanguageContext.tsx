@@ -78,32 +78,12 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
         if (current && typeof current === 'object' && key in current) {
           current = current[key];
         } else {
-          // Fallback lookup: check other language
-          let fallbackVal = translations.ar;
-          for (const fKey of keys) {
-            if (fallbackVal && typeof fallbackVal === 'object' && fKey in fallbackVal) {
-              fallbackVal = fallbackVal[fKey];
-            } else {
-              fallbackVal = undefined;
-              break;
-            }
-          }
-          if (!fallbackVal) {
-            fallbackVal = translations.en;
-            for (const fKey of keys) {
-              if (fallbackVal && typeof fallbackVal === 'object' && fKey in fallbackVal) {
-                fallbackVal = fallbackVal[fKey];
-              } else {
-                fallbackVal = undefined;
-                break;
-              }
-            }
-          }
-          current = fallbackVal;
+          current = undefined;
           break;
         }
       }
 
+      // Respect strict language separation: never leak opposite language fallback
       let result = typeof current === 'string' ? current : fallback || path;
 
       // Replace template params like {count} or {remaining} or {year}

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart, useCurrency, useLanguage, useToast } from '@/hooks';
+import { getProductName, getProductSubcategory, getProductColor } from '@/utils/localizedProduct';
 import ShippingProgressBar from '@/components/cart/ShippingProgressBar';
 import CartSummaryCard from '@/components/cart/CartSummaryCard';
 import { FiTrash2, FiShoppingBag } from 'react-icons/fi';
@@ -91,7 +92,7 @@ export default function CartPage() {
                         <div className="item-img-wrap">
                           <Image
                             src={item.image}
-                            alt={item.name}
+                            alt={getProductName(item as any, isRTL)}
                             width={90}
                             height={115}
                             className="item-table-img"
@@ -99,9 +100,11 @@ export default function CartPage() {
                         </div>
                         <div className="item-details">
                           <Link href={`/product/${item.id}`} className="item-name-link">
-                            {item.name}
+                            {getProductName(item as any, isRTL)}
                           </Link>
-                          <span className="item-subcat">{item.subcategory}</span>
+                          <span className="item-subcat">
+                            {getProductSubcategory(item as any, isRTL)}
+                          </span>
                           <div className="item-variant-tags">
                             {item.selectedSize && (
                               <span className="variant-tag">
@@ -110,7 +113,9 @@ export default function CartPage() {
                             )}
                             {item.selectedColor && (
                               <span className="variant-tag">
-                                {isRTL ? `اللون: ${item.selectedColor}` : `Color: ${item.selectedColor}`}
+                                {isRTL
+                                  ? `اللون: ${getProductColor(item.selectedColor, isRTL, item.id)}`
+                                  : `Color: ${item.selectedColor}`}
                               </span>
                             )}
                           </div>
@@ -173,11 +178,12 @@ export default function CartPage() {
                         type="button"
                         className="table-trash-btn"
                         onClick={() => {
+                          const itemName = getProductName(item as any, isRTL);
                           removeFromCart(item.id, item.selectedSize, item.selectedColor);
                           info(
                             isRTL
-                              ? `تمت إزالة ${item.name} من سلتك.`
-                              : `Removed ${item.name} from your bag.`
+                              ? `تمت إزالة "${itemName}" من حقيبة التسوق.`
+                              : `Removed "${itemName}" from your bag.`
                           );
                         }}
                         title={isRTL ? 'إزالة' : 'Remove Item'}

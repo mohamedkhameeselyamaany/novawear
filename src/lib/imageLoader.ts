@@ -35,3 +35,4 @@ export function getAssetPath(src: string): string {
   const cleanSrc = src.startsWith('/') ? src : `/${src}`;
   return `${basePath}${cleanSrc}`;
 }
+

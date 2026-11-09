@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart, useCurrency, useLanguage, useToast } from '@/hooks';
+import { getProductName } from '@/utils/localizedProduct';
 import OrderConfirmationModal from '@/components/checkout/OrderConfirmationModal';
 import {
   FiLock,
@@ -641,7 +642,7 @@ export default function CheckoutPage() {
                     />
                   </div>
                   <div className="mini-item-info">
-                    <h4 className="mini-name">{item.name}</h4>
+                    <h4 className="mini-name">{getProductName(item as any, isRTL)}</h4>
                     <span className="mini-meta">
                       {isRTL
                         ? `الكمية: ${item.quantity} ${item.selectedSize ? `| المقاس: ${item.selectedSize}` : ''}`

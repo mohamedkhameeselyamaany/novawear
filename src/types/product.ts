@@ -18,12 +18,15 @@ export type Subcategory =
 export interface Product {
   id: number;
   name: string;
+  nameAr?: string;
   category: MainCategory;
   subcategory: Subcategory;
+  subcategoryAr?: string;
   gender?: AccessoriesGender; // Specifically for accessories to partition men vs women accessories
   price: number;
   oldPrice?: number;
   description: string;
+  descriptionAr?: string;
   image: string;
   images: string[];
   rating: number;
@@ -31,6 +34,7 @@ export interface Product {
   discount?: number;
   sizes?: string[];
   colors?: string[];
+  colorsAr?: string[];
   inStock: boolean;
   new?: boolean;
   trending?: boolean;

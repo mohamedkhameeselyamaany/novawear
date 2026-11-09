@@ -25,7 +25,7 @@ export const HeroSection: React.FC = () => {
       </div>
 
       <div className="hero-content-container">
-        <div className="hero-badge animate-fade-in">
+        <div className="hero-badge">
           <span className="badge-sparkle">✦</span>
           <span>
             {isRTL ? 'تشكيلة خريف وشتاء 2026 الحصرية' : 'AUTUMN / WINTER 2026 EDIT'}
@@ -33,7 +33,7 @@ export const HeroSection: React.FC = () => {
           <span className="badge-sparkle">✦</span>
         </div>
 
-        <h1 className="hero-title animate-fade-in">
+        <h1 className="hero-title">
           {isRTL ? (
             <>
               الفخامة تبدأ من <br />
@@ -47,13 +47,13 @@ export const HeroSection: React.FC = () => {
           )}
         </h1>
 
-        <p className="hero-subtitle animate-fade-in">
+        <p className="hero-subtitle">
           {isRTL
             ? 'اكتشف مفهوماً جديداً للأناقة المعاصرة من خلال الخياطة الهندسية الدقيقة، والأقمشة الإيطالية الفاخرة، والقطع الخالدة.'
             : 'Discover modern luxury redefined through architectural tailoring, master-crafted silhouettes, and virgin Italian fabrics.'}
         </p>
 
-        <div className="hero-cta-group animate-fade-in">
+        <div className="hero-cta-group">
           <Link href="/men" className="btn btn-hero btn-hero-gold">
             <span>{isRTL ? 'تسوق أزياء الرجال' : 'SHOP MEN'}</span>
             <FiArrowRight style={{ transform: isRTL ? 'rotate(180deg)' : 'none' }} />

@@ -26,6 +26,8 @@
   "price": "Price",
   "inStock": "In Stock",
   "outOfStock": "Out of Stock",
+  "added": "Added",
+  "quickAdd": "Quick Add",
   "new": "New",
   "sale": "Sale",
   "free": "Free",

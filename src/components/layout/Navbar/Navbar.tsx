@@ -79,9 +79,10 @@ export const Navbar: React.FC = () => {
                 key={link.href}
                 href={link.href}
                 className={`nav-link ${isActive ? 'active' : ''}`}
+                aria-current={isActive ? 'page' : undefined}
               >
-                {link.label}
-                {isActive && <span className="nav-indicator" />}
+                <span className="nav-link-text">{link.label}</span>
+                <span className="nav-gold-underline" />
               </Link>
             );
           })}
