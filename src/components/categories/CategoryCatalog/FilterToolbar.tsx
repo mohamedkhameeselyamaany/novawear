@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useLanguage, useCurrency } from '@/hooks';
+import { getProductColor } from '@/utils/localizedProduct';
 import { FiX } from 'react-icons/fi';
 
 interface FilterToolbarProps {
@@ -66,7 +67,7 @@ export const FilterToolbar: React.FC<FilterToolbarProps> = ({
               <option value="all">{isRTL ? 'كافة الألوان' : 'All Colors'}</option>
               {availableColors.map((color) => (
                 <option key={color} value={color}>
-                  {color}
+                  {getProductColor(color, isRTL)}
                 </option>
               ))}
             </select>

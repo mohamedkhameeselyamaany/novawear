@@ -88,17 +88,28 @@ body.light-mode .testimonial-card:hover {
 
 .testimonial-avatar {
   position: relative;
-  width: 52px;
-  height: 52px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
+  overflow: hidden;
   background: linear-gradient(135deg, #1C1917, #0A0A0A);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  border: 1.5px solid var(--primary-gold, #C8A963);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  border: 2px solid var(--primary-gold, #C8A963);
   transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.avatar-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+  z-index: 2;
+  position: relative;
 }
 
 body.light-mode .testimonial-avatar {
@@ -116,6 +127,11 @@ body.light-mode .testimonial-avatar {
   font-size: 1.05rem;
   color: var(--primary-gold, #C8A963);
   letter-spacing: 0.05em;
+  z-index: 1;
+}
+
+.avatar-initials.fallback-only {
+  display: none;
 }
 
 .testimonial-client-meta {
@@ -309,3 +325,4 @@ body.light-mode .slider-arrow-btn {
     height: 42px;
   }
 }
+

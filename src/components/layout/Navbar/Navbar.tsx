@@ -54,8 +54,23 @@ export const Navbar: React.FC = () => {
     { href: '/men', label: t('navigation.men', 'أزياء الرجال') },
     { href: '/women', label: t('navigation.women', 'أزياء النساء') },
     { href: '/children', label: t('navigation.children', 'أزياء الأطفال') },
-    { href: '/accessories', label: t('navigation.accessories', 'الإكسسوارات') },
+    { href: '/accessories', label: t('navigation.accessories', 'الإكسسوارات الفاخرة') },
   ];
+
+  const isLinkActive = (targetHref: string) => {
+    if (!pathname) return targetHref === '/';
+    let current = pathname;
+    if (current.startsWith('/novawear')) {
+      current = current.slice('/novawear'.length) || '/';
+    }
+    current = current.replace(/\/$/, '') || '/';
+    const target = targetHref.replace(/\/$/, '') || '/';
+
+    if (target === '/') {
+      return current === '/';
+    }
+    return current === target || current.startsWith(`${target}/`);
+  };
 
   const currencies: CurrencyCode[] = ['EGP', 'USD', 'EUR', 'SAR', 'AED'];
 
@@ -73,7 +88,7 @@ export const Navbar: React.FC = () => {
         {/* Desktop Navigation Links */}
         <div className="navbar-links desktop-only">
           {navLinks.map((link) => {
-            const isActive = pathname === link.href;
+            const isActive = isLinkActive(link.href);
             return (
               <Link
                 key={link.href}

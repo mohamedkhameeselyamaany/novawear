@@ -115,30 +115,38 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
       usdAmount: number,
       opts: { minimumFractionDigits?: number; maximumFractionDigits?: number; isArabic?: boolean } = {}
     ): string => {
+      const isArabic =
+        opts.isArabic !== undefined
+          ? opts.isArabic
+          : typeof document !== 'undefined'
+          ? document.documentElement.lang === 'ar'
+          : true;
+
       const {
         minimumFractionDigits = currency === 'USD' || currency === 'EUR' ? 2 : 0,
         maximumFractionDigits = currency === 'USD' || currency === 'EUR' ? 2 : 0,
-        isArabic = typeof document !== 'undefined' ? document.documentElement.lang === 'ar' : true,
       } = opts;
 
       const amount = convertFromUSD(usdAmount);
-      const config = CURRENCY_CONFIGS[currency];
+      const config = CURRENCY_CONFIGS[currency] || CURRENCY_CONFIGS.EGP;
       const symbol = isArabic ? config.symbolAr : config.symbol;
 
-      const formattedNumber = amount.toLocaleString(isArabic ? 'ar-EG' : 'en-US', {
+      const formatter = new Intl.NumberFormat(isArabic ? 'ar-EG-u-nu-latn' : 'en-US', {
         minimumFractionDigits,
         maximumFractionDigits,
       });
 
+      const formattedNumber = formatter.format(amount);
+
       if (currency === 'USD') {
-        return `$${formattedNumber}`;
+        return isArabic ? `${formattedNumber} $` : `$${formattedNumber}`;
       }
       if (currency === 'EUR') {
-        return `€${formattedNumber}`;
+        return isArabic ? `${formattedNumber} €` : `€${formattedNumber}`;
       }
 
       // EGP, SAR, AED
-      return isArabic ? `${formattedNumber} ${symbol}` : `${formattedNumber} ${symbol}`;
+      return `${formattedNumber} ${symbol}`;
     },
     [currency, convertFromUSD]
   );

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import Image from 'next/image';
 import { useLanguage } from '@/hooks';
 import { FiStar, FiChevronLeft, FiChevronRight, FiCheckCircle } from 'react-icons/fi';
 import './Testimonials.css';
@@ -18,6 +19,7 @@ interface Testimonial {
   rating: number;
   initials: string;
   verified: boolean;
+  avatar: string;
 }
 
 const testimonialsData: Testimonial[] = [
@@ -36,6 +38,7 @@ const testimonialsData: Testimonial[] = [
     rating: 5,
     initials: 'TA',
     verified: true,
+    avatar: '/images/testimonials/avatar-1.jpg',
   },
   {
     id: 2,
@@ -52,6 +55,7 @@ const testimonialsData: Testimonial[] = [
     rating: 5,
     initials: 'SM',
     verified: true,
+    avatar: '/images/testimonials/avatar-2.jpg',
   },
   {
     id: 3,
@@ -68,6 +72,7 @@ const testimonialsData: Testimonial[] = [
     rating: 5,
     initials: 'AK',
     verified: true,
+    avatar: '/images/testimonials/avatar-3.jpg',
   },
   {
     id: 4,
@@ -84,6 +89,7 @@ const testimonialsData: Testimonial[] = [
     rating: 5,
     initials: 'NE',
     verified: true,
+    avatar: '/images/testimonials/avatar-4.jpg',
   },
   {
     id: 5,
@@ -100,6 +106,7 @@ const testimonialsData: Testimonial[] = [
     rating: 5,
     initials: 'KS',
     verified: true,
+    avatar: '/images/testimonials/avatar-5.jpg',
   },
   {
     id: 6,
@@ -116,6 +123,7 @@ const testimonialsData: Testimonial[] = [
     rating: 5,
     initials: 'MK',
     verified: true,
+    avatar: '/images/testimonials/avatar-6.jpg',
   },
 ];
 
@@ -123,8 +131,13 @@ export const Testimonials: React.FC = () => {
   const { isRTL } = useLanguage();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [isInView, setIsInView] = useState(true);
   const [visibleCount, setVisibleCount] = useState(3);
+  const [failedAvatars, setFailedAvatars] = useState<Record<number, boolean>>({});
+
+  const sectionRef = useRef<HTMLElement | null>(null);
   const touchStartX = useRef<number | null>(null);
+  const autoPlayTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Responsive items count calculation
   useEffect(() => {
@@ -143,8 +156,31 @@ export const Testimonials: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // IntersectionObserver: Pause auto-play when section is out of viewport
+  useEffect(() => {
+    if (!sectionRef.current || typeof IntersectionObserver === 'undefined') {
+      setIsInView(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { threshold: 0.15 }
+    );
+
+    observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   const total = testimonialsData.length;
   const maxIndex = Math.max(0, total - visibleCount);
+
+  // Keep activeIndex within bounds when visibleCount changes
+  useEffect(() => {
+    setActiveIndex((prev) => Math.min(prev, maxIndex));
+  }, [maxIndex]);
 
   const handleNext = useCallback(() => {
     setActiveIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
@@ -154,22 +190,50 @@ export const Testimonials: React.FC = () => {
     setActiveIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
   }, [maxIndex]);
 
-  // Continuous gentle auto-scroll
-  useEffect(() => {
+  // Gentle auto-scroll timer with clean reset
+  const startAutoPlay = useCallback(() => {
+    if (autoPlayTimerRef.current) {
+      clearInterval(autoPlayTimerRef.current);
+      autoPlayTimerRef.current = null;
+    }
+
     // Check prefers-reduced-motion
     if (typeof window !== 'undefined') {
       const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (prefersReduced) return;
     }
 
-    if (isPaused) return;
+    if (!isPaused && isInView) {
+      autoPlayTimerRef.current = setInterval(() => {
+        handleNext();
+      }, 5000);
+    }
+  }, [handleNext, isPaused, isInView]);
 
-    const interval = setInterval(() => {
-      handleNext();
-    }, 4500);
+  useEffect(() => {
+    startAutoPlay();
+    return () => {
+      if (autoPlayTimerRef.current) {
+        clearInterval(autoPlayTimerRef.current);
+      }
+    };
+  }, [startAutoPlay]);
 
-    return () => clearInterval(interval);
-  }, [handleNext, isPaused]);
+  // Manual actions with graceful timer reset
+  const onManualNext = () => {
+    handleNext();
+    startAutoPlay();
+  };
+
+  const onManualPrev = () => {
+    handlePrev();
+    startAutoPlay();
+  };
+
+  const onSelectDot = (idx: number) => {
+    setActiveIndex(idx);
+    startAutoPlay();
+  };
 
   // Touch Handlers for Mobile Swiping
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -183,13 +247,13 @@ export const Testimonials: React.FC = () => {
 
     if (Math.abs(diff) > 40) {
       if (isRTL) {
-        // In RTL, positive diff (swipe left) moves to next
-        if (diff > 0) handleNext();
-        else handlePrev();
+        // In RTL swipe left advances next
+        if (diff > 0) onManualNext();
+        else onManualPrev();
       } else {
-        // In LTR, positive diff (swipe left) moves to next
-        if (diff > 0) handleNext();
-        else handlePrev();
+        // In LTR swipe left advances next
+        if (diff > 0) onManualNext();
+        else onManualPrev();
       }
     }
     touchStartX.current = null;
@@ -202,8 +266,13 @@ export const Testimonials: React.FC = () => {
     ? `translateX(${offset}%)`
     : `translateX(-${offset}%)`;
 
+  const handleAvatarError = (id: number) => {
+    setFailedAvatars((prev) => ({ ...prev, [id]: true }));
+  };
+
   return (
     <section
+      ref={sectionRef}
       className="testimonials-section"
       aria-label={isRTL ? 'آراء نخبة عملائنا' : 'Client Testimonials'}
       onMouseEnter={() => setIsPaused(true)}
@@ -236,6 +305,8 @@ export const Testimonials: React.FC = () => {
           >
             {testimonialsData.map((item, idx) => {
               const isCurrent = idx >= activeIndex && idx < activeIndex + visibleCount;
+              const hasAvatarFailed = failedAvatars[item.id];
+
               return (
                 <div
                   key={item.id}
@@ -246,7 +317,20 @@ export const Testimonials: React.FC = () => {
                     {/* Top Header: Avatar + Meta */}
                     <div className="testimonial-card-header">
                       <div className="testimonial-avatar" aria-hidden="true">
-                        <span className="avatar-initials">{item.initials}</span>
+                        {!hasAvatarFailed && (
+                          <Image
+                            src={item.avatar}
+                            alt={isRTL ? item.authorAr : item.author}
+                            width={54}
+                            height={54}
+                            className="avatar-photo"
+                            onError={() => handleAvatarError(item.id)}
+                            priority={idx < 3}
+                          />
+                        )}
+                        <span className={`avatar-initials ${!hasAvatarFailed ? 'fallback-only' : ''}`}>
+                          {item.initials}
+                        </span>
                         <div className="avatar-gold-ring" />
                       </div>
                       <div className="testimonial-client-meta">
@@ -301,7 +385,7 @@ export const Testimonials: React.FC = () => {
           <button
             type="button"
             className="slider-arrow-btn prev-btn"
-            onClick={handlePrev}
+            onClick={onManualPrev}
             title={isRTL ? 'التقييم السابق' : 'Previous Testimonial'}
             aria-label={isRTL ? 'التقييم السابق' : 'Previous Testimonial'}
           >
@@ -315,7 +399,7 @@ export const Testimonials: React.FC = () => {
                 key={dotIdx}
                 type="button"
                 className={`slider-dot-btn ${dotIdx === activeIndex ? 'active' : ''}`}
-                onClick={() => setActiveIndex(dotIdx)}
+                onClick={() => onSelectDot(dotIdx)}
                 role="tab"
                 aria-selected={dotIdx === activeIndex}
                 aria-label={`Slide ${dotIdx + 1}`}
@@ -327,7 +411,7 @@ export const Testimonials: React.FC = () => {
           <button
             type="button"
             className="slider-arrow-btn next-btn"
-            onClick={handleNext}
+            onClick={onManualNext}
             title={isRTL ? 'التقييم التالي' : 'Next Testimonial'}
             aria-label={isRTL ? 'التقييم التالي' : 'Next Testimonial'}
           >

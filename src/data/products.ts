@@ -1,4 +1,10 @@
 import { Product, MainCategory, Subcategory, AccessoriesGender } from '../types/product';
+import arProductsData from '../locales/ar/productsData.json';
+
+const AR_DATA = arProductsData as Record<
+  string,
+  { name?: string; description?: string; subcategory?: string; colors?: Record<string, string> }
+>;
 
 export const products: Product[] = [
   // ==========================================
@@ -844,16 +850,26 @@ export const searchProducts = (query: string): Product[] => {
   }
 
   return products.filter((p) => {
+    const arItem = AR_DATA[String(p.id)];
+    const arColors = arItem?.colors ? Object.values(arItem.colors).join(' ') : '';
     const textTarget = (
       p.name +
       ' ' +
+      (p.nameAr || arItem?.name || '') +
+      ' ' +
       p.description +
+      ' ' +
+      (p.descriptionAr || arItem?.description || '') +
       ' ' +
       p.category +
       ' ' +
       p.subcategory +
       ' ' +
-      (p.colors ? p.colors.join(' ') : '')
+      (p.subcategoryAr || arItem?.subcategory || '') +
+      ' ' +
+      (p.colors ? p.colors.join(' ') : '') +
+      ' ' +
+      arColors
     ).toLowerCase();
 
     // Direct match

@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import './Logo.css';
 
 interface LogoProps {
@@ -18,6 +19,22 @@ export const Logo: React.FC<LogoProps> = ({
   href = '/',
   showSubtitle = true,
 }) => {
+  const pathname = usePathname();
+
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const isHomeTarget = href === '/' || href === '';
+    const cleanPath = pathname?.replace(/\/$/, '') || '/';
+    const isCurrentHome = cleanPath === '/' || cleanPath === '/novawear';
+
+    if (isHomeTarget && isCurrentHome) {
+      e.preventDefault();
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+    }
+  };
+
   // Proportions matching the official logo aspect ratio (~1.356:1)
   const dimensionsMap = {
     sm: { width: 52, height: 38 },
@@ -44,7 +61,12 @@ export const Logo: React.FC<LogoProps> = ({
   if (variant === 'icon') {
     if (!href) return logoImage;
     return (
-      <Link href={href} className="logo-link" aria-label="NOVA WEAR Home">
+      <Link
+        href={href}
+        className="logo-link"
+        aria-label="NOVA WEAR Home"
+        onClick={handleLogoClick}
+      >
         {logoImage}
       </Link>
     );
@@ -65,7 +87,12 @@ export const Logo: React.FC<LogoProps> = ({
   if (!href) return content;
 
   return (
-    <Link href={href} className="logo-link" aria-label="NOVA WEAR Home">
+    <Link
+      href={href}
+      className="logo-link"
+      aria-label="NOVA WEAR Home"
+      onClick={handleLogoClick}
+    >
       {content}
     </Link>
   );

@@ -35,20 +35,35 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
   onSelectCurrency,
   onClose,
 }) => {
+  const isLinkActive = (targetHref: string) => {
+    if (!pathname) return targetHref === '/';
+    let current = pathname;
+    if (current.startsWith('/novawear')) {
+      current = current.slice('/novawear'.length) || '/';
+    }
+    current = current.replace(/\/$/, '') || '/';
+    const target = targetHref.replace(/\/$/, '') || '/';
+    if (target === '/') return current === '/';
+    return current === target || current.startsWith(`${target}/`);
+  };
+
   return (
     <div className="mobile-drawer glass-panel animate-fade-in">
       <div className="mobile-drawer-inner">
         <div className="mobile-nav-list">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`mobile-nav-link ${pathname === link.href ? 'active' : ''}`}
-              onClick={onClose}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const isActive = isLinkActive(link.href);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`mobile-nav-link ${isActive ? 'active' : ''}`}
+                onClick={onClose}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </div>
 
         <div className="mobile-drawer-footer">
