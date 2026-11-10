@@ -1,0 +1,95 @@
+/* ===============================================
+   NOVA WEAR — Global Floating Scroll-To-Top Button
+   =============================================== */
+
+.scroll-to-top-btn {
+  position: fixed;
+  bottom: 2.2rem;
+  right: 2.2rem;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #DFBF86 0%, #C8A963 50%, #9B7A3C 100%);
+  color: #0A0A0A;
+  border: 1px solid rgba(255, 244, 208, 0.45);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), 0 0 16px rgba(200, 169, 99, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 99;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(16px) scale(0.9);
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.35s ease,
+              background 0.35s ease;
+  outline: none;
+}
+
+/* RTL Support: Align button to bottom-left in Arabic */
+[dir="rtl"] .scroll-to-top-btn,
+body.lang-ar .scroll-to-top-btn {
+  right: auto;
+  left: 2.2rem;
+}
+
+.scroll-to-top-btn.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.scroll-to-top-btn:hover {
+  transform: translateY(-4px) scale(1.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 24px rgba(200, 169, 99, 0.65);
+  background: linear-gradient(135deg, #FFF4D0 0%, #DFBF86 40%, #C8A963 100%);
+  color: #050505;
+}
+
+.scroll-to-top-btn:active {
+  transform: translateY(0) scale(0.95);
+}
+
+.scroll-arrow-icon {
+  font-size: 1.35rem;
+  stroke-width: 2.4;
+  transition: transform 0.25s ease;
+}
+
+.scroll-to-top-btn:hover .scroll-arrow-icon {
+  transform: translateY(-2px);
+}
+
+/* Mobile responsive adjustment */
+@media (max-width: 768px) {
+  .scroll-to-top-btn {
+    bottom: 1.5rem;
+    right: 1.25rem;
+    width: 44px;
+    height: 44px;
+  }
+
+  [dir="rtl"] .scroll-to-top-btn,
+  body.lang-ar .scroll-to-top-btn {
+    right: auto;
+    left: 1.25rem;
+  }
+
+  .scroll-arrow-icon {
+    font-size: 1.2rem;
+  }
+}
+
+/* Accessibility: respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-to-top-btn {
+    transition: opacity 0.2s ease, visibility 0.2s ease !important;
+    transform: none !important;
+  }
+  .scroll-to-top-btn:hover {
+    transform: none !important;
+  }
+}

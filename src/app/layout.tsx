@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Providers } from '@/components/layout/Providers';
 import Navbar from '@/components/layout/Navbar/Navbar';
 import Footer from '@/components/layout/Footer/Footer';
+import ScrollToTop from '@/components/common/ScrollToTop/ScrollToTop';
 import './globals.css';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
@@ -64,6 +65,7 @@ export default function RootLayout({
             <Navbar />
             <main className="flex-grow">{children}</main>
             <Footer />
+            <ScrollToTop />
           </div>
         </Providers>
       </body>

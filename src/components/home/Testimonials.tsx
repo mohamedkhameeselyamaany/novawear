@@ -127,9 +127,19 @@ const testimonialsData: Testimonial[] = [
   },
 ];
 
+// 3 cloned sets create seamless infinite looping without visible jumps
+const TOTAL_ORIGINAL = testimonialsData.length;
+const EXTENDED_SLIDES = [
+  ...testimonialsData.map((t, idx) => ({ ...t, uniqueKey: `set1-${t.id}-${idx}` })),
+  ...testimonialsData.map((t, idx) => ({ ...t, uniqueKey: `set2-${t.id}-${idx}` })),
+  ...testimonialsData.map((t, idx) => ({ ...t, uniqueKey: `set3-${t.id}-${idx}` })),
+];
+
 export const Testimonials: React.FC = () => {
   const { isRTL } = useLanguage();
-  const [activeIndex, setActiveIndex] = useState(0);
+  // Start at the beginning of Set 2 (index = TOTAL_ORIGINAL = 6)
+  const [currentIndex, setCurrentIndex] = useState(TOTAL_ORIGINAL);
+  const [isTransitioning, setIsTransitioning] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
   const [isInView, setIsInView] = useState(true);
   const [visibleCount, setVisibleCount] = useState(3);
@@ -174,23 +184,43 @@ export const Testimonials: React.FC = () => {
     return () => observer.disconnect();
   }, []);
 
-  const total = testimonialsData.length;
-  const maxIndex = Math.max(0, total - visibleCount);
+  // Seamless Infinite Looping: Normalize index when boundary is reached
+  const handleTransitionEnd = () => {
+    // If we've advanced into Set 3 (index >= 12), jump back to Set 2 (index - 6) without animation
+    if (currentIndex >= TOTAL_ORIGINAL * 2) {
+      setIsTransitioning(false);
+      setCurrentIndex((prev) => prev - TOTAL_ORIGINAL);
+    }
+    // If we've reversed into Set 1 (index < 6), jump forward to Set 2 (index + 6) without animation
+    else if (currentIndex < TOTAL_ORIGINAL) {
+      setIsTransitioning(false);
+      setCurrentIndex((prev) => prev + TOTAL_ORIGINAL);
+    }
+  };
 
-  // Keep activeIndex within bounds when visibleCount changes
+  // Re-enable smooth transition after instantaneous jump
   useEffect(() => {
-    setActiveIndex((prev) => Math.min(prev, maxIndex));
-  }, [maxIndex]);
+    if (!isTransitioning) {
+      const raf = requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setIsTransitioning(true);
+        });
+      });
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [isTransitioning]);
 
   const handleNext = useCallback(() => {
-    setActiveIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
-  }, [maxIndex]);
+    setIsTransitioning(true);
+    setCurrentIndex((prev) => prev + 1);
+  }, []);
 
   const handlePrev = useCallback(() => {
-    setActiveIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
-  }, [maxIndex]);
+    setIsTransitioning(true);
+    setCurrentIndex((prev) => prev - 1);
+  }, []);
 
-  // Gentle auto-scroll timer with clean reset
+  // Premium 2.5 second autoplay timer with strict single-timer guarantee
   const startAutoPlay = useCallback(() => {
     if (autoPlayTimerRef.current) {
       clearInterval(autoPlayTimerRef.current);
@@ -206,7 +236,7 @@ export const Testimonials: React.FC = () => {
     if (!isPaused && isInView) {
       autoPlayTimerRef.current = setInterval(() => {
         handleNext();
-      }, 5000);
+      }, 2500); // 2.5 seconds autoplay interval as requested
     }
   }, [handleNext, isPaused, isInView]);
 
@@ -230,8 +260,11 @@ export const Testimonials: React.FC = () => {
     startAutoPlay();
   };
 
-  const onSelectDot = (idx: number) => {
-    setActiveIndex(idx);
+  const onSelectDot = (dotIndex: number) => {
+    setIsTransitioning(true);
+    // Align so that active card matches selected dot
+    const targetOffset = visibleCount === 3 ? 1 : 0;
+    setCurrentIndex(TOTAL_ORIGINAL + dotIndex - targetOffset);
     startAutoPlay();
   };
 
@@ -247,11 +280,9 @@ export const Testimonials: React.FC = () => {
 
     if (Math.abs(diff) > 40) {
       if (isRTL) {
-        // In RTL swipe left advances next
         if (diff > 0) onManualNext();
         else onManualPrev();
       } else {
-        // In LTR swipe left advances next
         if (diff > 0) onManualNext();
         else onManualPrev();
       }
@@ -259,12 +290,18 @@ export const Testimonials: React.FC = () => {
     touchStartX.current = null;
   };
 
-  // Calculate sliding transform offset
+  // Card Width & Transform Offset
   const cardWidthPercent = 100 / visibleCount;
-  const offset = activeIndex * cardWidthPercent;
+  const offset = currentIndex * cardWidthPercent;
   const transformStyle = isRTL
     ? `translateX(${offset}%)`
     : `translateX(-${offset}%)`;
+
+  // Determine active card for the luxury spotlight scale zoom (1.05 - 1.08)
+  // On desktop (3 items visible), the center item (currentIndex + 1) is active
+  // On mobile (1 item visible) or tablet (2 items), the leading card is active
+  const activeFocusOffset = visibleCount === 3 ? 1 : 0;
+  const activeNormalizedId = ((currentIndex + activeFocusOffset) % TOTAL_ORIGINAL) + 1;
 
   const handleAvatarError = (id: number) => {
     setFailedAvatars((prev) => ({ ...prev, [id]: true }));
@@ -300,17 +337,19 @@ export const Testimonials: React.FC = () => {
         {/* Carousel Viewport Container */}
         <div className="testimonials-viewport">
           <div
-            className="testimonials-slider-track"
+            className={`testimonials-slider-track ${!isTransitioning ? 'no-transition' : ''}`}
             style={{ transform: transformStyle }}
+            onTransitionEnd={handleTransitionEnd}
           >
-            {testimonialsData.map((item, idx) => {
-              const isCurrent = idx >= activeIndex && idx < activeIndex + visibleCount;
+            {EXTENDED_SLIDES.map((item, idx) => {
+              // The card in focus receives the active scale zoom (approx 1.06)
+              const isActive = item.id === activeNormalizedId && Math.abs(idx - (currentIndex + activeFocusOffset)) === 0;
               const hasAvatarFailed = failedAvatars[item.id];
 
               return (
                 <div
-                  key={item.id}
-                  className={`testimonial-slide-col ${isCurrent ? 'is-active' : ''}`}
+                  key={item.uniqueKey}
+                  className={`testimonial-slide-col ${isActive ? 'is-active' : ''}`}
                   style={{ width: `${cardWidthPercent}%` }}
                 >
                   <article className="testimonial-card glass-panel">
@@ -325,7 +364,7 @@ export const Testimonials: React.FC = () => {
                             height={54}
                             className="avatar-photo"
                             onError={() => handleAvatarError(item.id)}
-                            priority={idx < 3}
+                            priority={idx >= TOTAL_ORIGINAL && idx < TOTAL_ORIGINAL + 3}
                           />
                         )}
                         <span className={`avatar-initials ${!hasAvatarFailed ? 'fallback-only' : ''}`}>
@@ -392,19 +431,22 @@ export const Testimonials: React.FC = () => {
             {isRTL ? <FiChevronRight size={22} /> : <FiChevronLeft size={22} />}
           </button>
 
-          {/* Dots Indicator */}
+          {/* Dots Indicator: 6 original reviews */}
           <div className="slider-dots-container" role="tablist">
-            {Array.from({ length: maxIndex + 1 }).map((_, dotIdx) => (
-              <button
-                key={dotIdx}
-                type="button"
-                className={`slider-dot-btn ${dotIdx === activeIndex ? 'active' : ''}`}
-                onClick={() => onSelectDot(dotIdx)}
-                role="tab"
-                aria-selected={dotIdx === activeIndex}
-                aria-label={`Slide ${dotIdx + 1}`}
-              />
-            ))}
+            {testimonialsData.map((_, dotIdx) => {
+              const isDotActive = dotIdx === (activeNormalizedId - 1);
+              return (
+                <button
+                  key={dotIdx}
+                  type="button"
+                  className={`slider-dot-btn ${isDotActive ? 'active' : ''}`}
+                  onClick={() => onSelectDot(dotIdx)}
+                  role="tab"
+                  aria-selected={isDotActive}
+                  aria-label={`Testimonial ${dotIdx + 1}`}
+                />
+              );
+            })}
           </div>
 
           {/* Next Arrow Button */}
