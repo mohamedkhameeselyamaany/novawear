@@ -3,10 +3,18 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { useLanguage } from '@/hooks';
-import { FiStar, FiChevronLeft, FiChevronRight, FiCheckCircle } from 'react-icons/fi';
+import {
+  FiStar,
+  FiChevronLeft,
+  FiChevronRight,
+  FiCheckCircle,
+  FiX,
+  FiMaximize2,
+  FiAward,
+} from 'react-icons/fi';
 import './Testimonials.css';
 
-interface Testimonial {
+export interface Testimonial {
   id: number;
   author: string;
   authorAr: string;
@@ -20,9 +28,11 @@ interface Testimonial {
   initials: string;
   verified: boolean;
   avatar: string;
+  dateEn?: string;
+  dateAr?: string;
 }
 
-const testimonialsData: Testimonial[] = [
+export const testimonialsData: Testimonial[] = [
   {
     id: 1,
     author: 'Tarek El-Alfy',
@@ -39,6 +49,8 @@ const testimonialsData: Testimonial[] = [
     initials: 'TA',
     verified: true,
     avatar: '/images/testimonials/avatar-1.jpg',
+    dateEn: 'Verified Purchase • October 2026',
+    dateAr: 'شراء موثق • أكتوبر 2026',
   },
   {
     id: 2,
@@ -56,6 +68,8 @@ const testimonialsData: Testimonial[] = [
     initials: 'SM',
     verified: true,
     avatar: '/images/testimonials/avatar-2.jpg',
+    dateEn: 'Verified Purchase • November 2026',
+    dateAr: 'شراء موثق • نوفمبر 2026',
   },
   {
     id: 3,
@@ -73,6 +87,8 @@ const testimonialsData: Testimonial[] = [
     initials: 'AK',
     verified: true,
     avatar: '/images/testimonials/avatar-3.jpg',
+    dateEn: 'Verified Purchase • September 2026',
+    dateAr: 'شراء موثق • سبتمبر 2026',
   },
   {
     id: 4,
@@ -90,6 +106,8 @@ const testimonialsData: Testimonial[] = [
     initials: 'NE',
     verified: true,
     avatar: '/images/testimonials/avatar-4.jpg',
+    dateEn: 'Verified Purchase • October 2026',
+    dateAr: 'شراء موثق • أكتوبر 2026',
   },
   {
     id: 5,
@@ -107,6 +125,8 @@ const testimonialsData: Testimonial[] = [
     initials: 'KS',
     verified: true,
     avatar: '/images/testimonials/avatar-5.jpg',
+    dateEn: 'Verified Purchase • August 2026',
+    dateAr: 'شراء موثق • أغسطس 2026',
   },
   {
     id: 6,
@@ -124,40 +144,51 @@ const testimonialsData: Testimonial[] = [
     initials: 'MK',
     verified: true,
     avatar: '/images/testimonials/avatar-6.jpg',
+    dateEn: 'Verified Purchase • November 2026',
+    dateAr: 'شراء موثق • نوفمبر 2026',
   },
 ];
 
-// 3 cloned sets create seamless infinite looping without visible jumps
-const TOTAL_ORIGINAL = testimonialsData.length;
-const EXTENDED_SLIDES = [
-  ...testimonialsData.map((t, idx) => ({ ...t, uniqueKey: `set1-${t.id}-${idx}` })),
-  ...testimonialsData.map((t, idx) => ({ ...t, uniqueKey: `set2-${t.id}-${idx}` })),
-  ...testimonialsData.map((t, idx) => ({ ...t, uniqueKey: `set3-${t.id}-${idx}` })),
-];
+const TOTAL_CARDS = testimonialsData.length;
+const ANGLE_STEP = 360 / TOTAL_CARDS; // 60 degrees between each card
 
 export const Testimonials: React.FC = () => {
   const { isRTL } = useLanguage();
-  // Start at the beginning of Set 2 (index = TOTAL_ORIGINAL = 6)
-  const [currentIndex, setCurrentIndex] = useState(TOTAL_ORIGINAL);
-  const [isTransitioning, setIsTransitioning] = useState(true);
+
+  // Carousel state
+  const [rotationAngle, setRotationAngle] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isInView, setIsInView] = useState(true);
-  const [visibleCount, setVisibleCount] = useState(3);
+  const [stageDimensions, setStageDimensions] = useState({
+    radius: 430,
+    cardWidth: 360,
+    perspective: 1200,
+  });
+
+  // Modal / Full Comment View state
+  const [selectedComment, setSelectedComment] = useState<Testimonial | null>(null);
   const [failedAvatars, setFailedAvatars] = useState<Record<number, boolean>>({});
 
+  // Refs for tracking drag & autoplay
   const sectionRef = useRef<HTMLElement | null>(null);
-  const touchStartX = useRef<number | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const pointerStartX = useRef<number>(0);
+  const pointerStartAngle = useRef<number>(0);
+  const dragDistanceRef = useRef<number>(0);
+  const isDraggingRef = useRef<boolean>(false);
   const autoPlayTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Responsive items count calculation
+  // Responsive radius, perspective, and card width
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 680) {
-        setVisibleCount(1);
-      } else if (window.innerWidth < 1080) {
-        setVisibleCount(2);
+      const width = window.innerWidth;
+      if (width < 640) {
+        setStageDimensions({ radius: 210, cardWidth: 290, perspective: 850 });
+      } else if (width < 1024) {
+        setStageDimensions({ radius: 320, cardWidth: 320, perspective: 1050 });
       } else {
-        setVisibleCount(3);
+        setStageDimensions({ radius: 430, cardWidth: 360, perspective: 1200 });
       }
     };
 
@@ -166,7 +197,7 @@ export const Testimonials: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // IntersectionObserver: Pause auto-play when section is out of viewport
+  // IntersectionObserver to pause autoplay when off-screen
   useEffect(() => {
     if (!sectionRef.current || typeof IntersectionObserver === 'undefined') {
       setIsInView(true);
@@ -184,61 +215,58 @@ export const Testimonials: React.FC = () => {
     return () => observer.disconnect();
   }, []);
 
-  // Seamless Infinite Looping: Normalize index when boundary is reached
-  const handleTransitionEnd = () => {
-    // If we've advanced into Set 3 (index >= 12), jump back to Set 2 (index - 6) without animation
-    if (currentIndex >= TOTAL_ORIGINAL * 2) {
-      setIsTransitioning(false);
-      setCurrentIndex((prev) => prev - TOTAL_ORIGINAL);
-    }
-    // If we've reversed into Set 1 (index < 6), jump forward to Set 2 (index + 6) without animation
-    else if (currentIndex < TOTAL_ORIGINAL) {
-      setIsTransitioning(false);
-      setCurrentIndex((prev) => prev + TOTAL_ORIGINAL);
-    }
-  };
-
-  // Re-enable smooth transition after instantaneous jump
+  // Keyboard navigation & Esc key to close comment modal
   useEffect(() => {
-    if (!isTransitioning) {
-      const raf = requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setIsTransitioning(true);
-        });
-      });
-      return () => cancelAnimationFrame(raf);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && selectedComment) {
+        setSelectedComment(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedComment]);
+
+  // Lock body scroll when modal is active
+  useEffect(() => {
+    if (selectedComment) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
     }
-  }, [isTransitioning]);
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [selectedComment]);
 
-  const handleNext = useCallback(() => {
-    setIsTransitioning(true);
-    setCurrentIndex((prev) => prev + 1);
-  }, []);
+  // Navigation handlers
+  const rotateNext = useCallback(() => {
+    const dir = isRTL ? 1 : -1;
+    setRotationAngle((prev) => prev + dir * ANGLE_STEP);
+  }, [isRTL]);
 
-  const handlePrev = useCallback(() => {
-    setIsTransitioning(true);
-    setCurrentIndex((prev) => prev - 1);
-  }, []);
+  const rotatePrev = useCallback(() => {
+    const dir = isRTL ? -1 : 1;
+    setRotationAngle((prev) => prev + dir * ANGLE_STEP);
+  }, [isRTL]);
 
-  // Premium 2.5 second autoplay timer with strict single-timer guarantee
+  // Autoplay management
   const startAutoPlay = useCallback(() => {
     if (autoPlayTimerRef.current) {
       clearInterval(autoPlayTimerRef.current);
       autoPlayTimerRef.current = null;
     }
 
-    // Check prefers-reduced-motion
     if (typeof window !== 'undefined') {
       const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (prefersReduced) return;
     }
 
-    if (!isPaused && isInView) {
+    if (!isPaused && isInView && !isDragging && !selectedComment) {
       autoPlayTimerRef.current = setInterval(() => {
-        handleNext();
-      }, 2500); // 2.5 seconds autoplay interval as requested
+        rotateNext();
+      }, 3500);
     }
-  }, [handleNext, isPaused, isInView]);
+  }, [rotateNext, isPaused, isInView, isDragging, selectedComment]);
 
   useEffect(() => {
     startAutoPlay();
@@ -249,59 +277,109 @@ export const Testimonials: React.FC = () => {
     };
   }, [startAutoPlay]);
 
-  // Manual actions with graceful timer reset
-  const onManualNext = () => {
-    handleNext();
+  const handleManualNext = () => {
+    rotateNext();
     startAutoPlay();
   };
 
-  const onManualPrev = () => {
-    handlePrev();
+  const handleManualPrev = () => {
+    rotatePrev();
     startAutoPlay();
   };
 
-  const onSelectDot = (dotIndex: number) => {
-    setIsTransitioning(true);
-    // Align so that active card matches selected dot
-    const targetOffset = visibleCount === 3 ? 1 : 0;
-    setCurrentIndex(TOTAL_ORIGINAL + dotIndex - targetOffset);
-    startAutoPlay();
-  };
+  // Pointer / Mouse / Touch Drag Mechanics
+  const handlePointerDown = (e: React.PointerEvent) => {
+    // Only respond to main click / touch
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    pointerStartX.current = e.clientX;
+    pointerStartAngle.current = rotationAngle;
+    dragDistanceRef.current = 0;
+    isDraggingRef.current = false;
+    setIsDragging(true);
 
-  // Touch Handlers for Mobile Swiping
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null) return;
-    const touchEndX = e.changedTouches[0].clientX;
-    const diff = touchStartX.current - touchEndX;
-
-    if (Math.abs(diff) > 40) {
-      if (isRTL) {
-        if (diff > 0) onManualNext();
-        else onManualPrev();
-      } else {
-        if (diff > 0) onManualNext();
-        else onManualPrev();
-      }
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // ignore
     }
-    touchStartX.current = null;
   };
 
-  // Card Width & Transform Offset
-  const cardWidthPercent = 100 / visibleCount;
-  const offset = currentIndex * cardWidthPercent;
-  const transformStyle = isRTL
-    ? `translateX(${offset}%)`
-    : `translateX(-${offset}%)`;
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging) return;
+    const deltaX = e.clientX - pointerStartX.current;
+    dragDistanceRef.current = Math.abs(deltaX);
 
-  // Determine active card for the luxury spotlight scale zoom (1.05 - 1.08)
-  // On desktop (3 items visible), the center item (currentIndex + 1) is active
-  // On mobile (1 item visible) or tablet (2 items), the leading card is active
-  const activeFocusOffset = visibleCount === 3 ? 1 : 0;
-  const activeNormalizedId = ((currentIndex + activeFocusOffset) % TOTAL_ORIGINAL) + 1;
+    if (dragDistanceRef.current > 6) {
+      isDraggingRef.current = true;
+    }
+
+    const stageWidth = stageRef.current?.offsetWidth || 800;
+    const dirFactor = isRTL ? -1 : 1;
+    // Map pixels to degrees smoothly
+    const degChange = (deltaX / stageWidth) * 160 * dirFactor;
+    setRotationAngle(pointerStartAngle.current + degChange);
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!isDragging) return;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      // ignore
+    }
+
+    setIsDragging(false);
+
+    // If user dragged more than 6px, snap to the nearest 60-degree card angle
+    if (dragDistanceRef.current > 6) {
+      const nearestAngle = Math.round(rotationAngle / ANGLE_STEP) * ANGLE_STEP;
+      setRotationAngle(nearestAngle);
+      startAutoPlay();
+      // Keep isDraggingRef active briefly to suppress accidental card click
+      setTimeout(() => {
+        isDraggingRef.current = false;
+      }, 120);
+    } else {
+      isDraggingRef.current = false;
+    }
+  };
+
+  // Click on a comment card: View full review comment & snap carousel if needed
+  const handleCardClick = (item: Testimonial, index: number) => {
+    if (isDraggingRef.current) return;
+
+    // Calculate how far this card is from the center
+    const cardBaseAngle = index * ANGLE_STEP;
+    const dir = isRTL ? -1 : 1;
+    // Target rotation to bring this card directly to center
+    const currentNearestSteps = Math.round(rotationAngle / ANGLE_STEP);
+    // Find matching angle equivalent
+    const targetAngle = -cardBaseAngle * dir;
+    // Adjust to closest multiple of 360 to prevent large spin
+    const deltaSteps = Math.round((targetAngle - rotationAngle) / 360);
+    const smoothTargetAngle = targetAngle - deltaSteps * 360;
+
+    setRotationAngle(smoothTargetAngle);
+    setSelectedComment(item);
+    startAutoPlay();
+  };
+
+  // Dot navigation
+  const handleSelectDot = (dotIdx: number) => {
+    const cardBaseAngle = dotIdx * ANGLE_STEP;
+    const dir = isRTL ? -1 : 1;
+    const targetAngle = -cardBaseAngle * dir;
+    const deltaSteps = Math.round((targetAngle - rotationAngle) / 360);
+    const smoothTargetAngle = targetAngle - deltaSteps * 360;
+    setRotationAngle(smoothTargetAngle);
+    startAutoPlay();
+  };
+
+  // Determine which card is currently active in the front center
+  const normalizedRotation = ((-rotationAngle % 360) + 360) % 360;
+  const dir = isRTL ? -1 : 1;
+  const activeDotIndex =
+    ((Math.round((rotationAngle * dir) / ANGLE_STEP) % TOTAL_CARDS) + TOTAL_CARDS) % TOTAL_CARDS;
 
   const handleAvatarError = (id: number) => {
     setFailedAvatars((prev) => ({ ...prev, [id]: true }));
@@ -310,12 +388,10 @@ export const Testimonials: React.FC = () => {
   return (
     <section
       ref={sectionRef}
-      className="testimonials-section"
+      className="testimonials-section circular-carousel-root"
       aria-label={isRTL ? 'آراء نخبة عملائنا' : 'Client Testimonials'}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
     >
       <div className="container">
         {/* Section Header */}
@@ -329,31 +405,74 @@ export const Testimonials: React.FC = () => {
           <div className="title-gold-bar mx-auto" />
           <p className="testimonials-lead-text">
             {isRTL
-              ? 'شهادات حقيقية من نخبة أصحاب الذوق الرفيع الذين اختاروا تصاميمنا الفاخرة.'
-              : 'Endorsements from our discerning clientele who value modern sartorial perfection.'}
+              ? 'شهادات حقيقية من نخبة أصحاب الذوق الرفيع. اسحب للتصفح واضغط على أي تعليق لقراءته بالكامل.'
+              : 'Endorsements from our discerning clientele. Drag to rotate in 3D and click any comment to read full review.'}
           </p>
         </div>
 
-        {/* Carousel Viewport Container */}
-        <div className="testimonials-viewport">
-          <div
-            className={`testimonials-slider-track ${!isTransitioning ? 'no-transition' : ''}`}
-            style={{ transform: transformStyle }}
-            onTransitionEnd={handleTransitionEnd}
-          >
-            {EXTENDED_SLIDES.map((item, idx) => {
-              // The card in focus receives the active scale zoom (approx 1.06)
-              const isActive = item.id === activeNormalizedId && Math.abs(idx - (currentIndex + activeFocusOffset)) === 0;
+        {/* 3D Circular Carousel Stage */}
+        <div
+          ref={stageRef}
+          className={`circular-carousel-stage ${isDragging ? 'is-dragging' : ''}`}
+          style={{ perspective: `${stageDimensions.perspective}px` }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+        >
+          <div className="circular-carousel-cylinder">
+            {testimonialsData.map((item, index) => {
+              // 3D cylindrical geometry calculation
+              const cardBaseAngle = index * ANGLE_STEP;
+              const dirMultiplier = isRTL ? -1 : 1;
+              const currentTotalAngle = cardBaseAngle + rotationAngle * dirMultiplier;
+
+              // Normalize angle into [-180, 180] range relative to camera
+              let relativeAngle = ((currentTotalAngle % 360) + 360) % 360;
+              if (relativeAngle > 180) relativeAngle -= 360;
+
+              const rad = (relativeAngle * Math.PI) / 180;
+              const R = stageDimensions.radius;
+
+              // Cylindrical coordinates
+              const x = Math.sin(rad) * R * dirMultiplier;
+              const z = (Math.cos(rad) - 1) * R; // z <= 0
+              const rotY = relativeAngle * 0.55 * dirMultiplier; // Gentle 3D perspective tilt
+
+              // Continuous depth scaling and opacity
+              const cosVal = Math.cos(rad);
+              const scale = 0.82 + 0.24 * Math.max(0, cosVal); // 1.06 at center, ~0.82 at edge
+              const opacity =
+                Math.abs(relativeAngle) > 130
+                  ? 0
+                  : Math.max(0.2, Math.pow(Math.max(0, cosVal), 1.3));
+              const zIndex = Math.round((cosVal + 1) * 20);
+              const isActive = Math.abs(relativeAngle) < 25;
+              const isPointerDisabled = Math.abs(relativeAngle) > 120;
               const hasAvatarFailed = failedAvatars[item.id];
 
               return (
                 <div
-                  key={item.uniqueKey}
-                  className={`testimonial-slide-col ${isActive ? 'is-active' : ''}`}
-                  style={{ width: `${cardWidthPercent}%` }}
+                  key={item.id}
+                  className={`circular-card-wrapper ${isActive ? 'is-active' : ''}`}
+                  style={{
+                    width: `${stageDimensions.cardWidth}px`,
+                    marginLeft: `-${stageDimensions.cardWidth / 2}px`,
+                    transform: `translate3d(${x}px, 0px, ${z}px) rotateY(${rotY}deg) scale(${scale})`,
+                    opacity: opacity,
+                    zIndex: zIndex,
+                    pointerEvents: isPointerDisabled ? 'none' : 'auto',
+                    transition: isDragging
+                      ? 'none'
+                      : 'transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.55s ease',
+                  }}
+                  onClick={() => handleCardClick(item, index)}
+                  role="button"
+                  tabIndex={isActive ? 0 : -1}
+                  aria-label={`${item.author} review - Click to view comment`}
                 >
-                  <article className="testimonial-card glass-panel">
-                    {/* Top Header: Avatar + Meta */}
+                  <article className="testimonial-card glass-panel circular-card-inner">
+                    {/* Top Header: Avatar + Metadata */}
                     <div className="testimonial-card-header">
                       <div className="testimonial-avatar" aria-hidden="true">
                         {!hasAvatarFailed && (
@@ -364,7 +483,7 @@ export const Testimonials: React.FC = () => {
                             height={54}
                             className="avatar-photo"
                             onError={() => handleAvatarError(item.id)}
-                            priority={idx >= TOTAL_ORIGINAL && idx < TOTAL_ORIGINAL + 3}
+                            priority={item.id <= 3}
                           />
                         )}
                         <span className={`avatar-initials ${!hasAvatarFailed ? 'fallback-only' : ''}`}>
@@ -372,6 +491,7 @@ export const Testimonials: React.FC = () => {
                         </span>
                         <div className="avatar-gold-ring" />
                       </div>
+
                       <div className="testimonial-client-meta">
                         <div className="client-name-row">
                           <h3 className="client-name">
@@ -402,10 +522,18 @@ export const Testimonials: React.FC = () => {
                       ))}
                     </div>
 
-                    {/* Quote Text */}
+                    {/* Review Quote Snippet */}
                     <p className="testimonial-quote">
                       &ldquo;{isRTL ? item.quoteAr : item.quote}&rdquo;
                     </p>
+
+                    {/* Interactive Click-to-view Action Hint */}
+                    <div className="card-action-hint">
+                      <span className="hint-text">
+                        {isRTL ? 'اضغط لعرض التقييم بالكامل' : 'Click to view full review'}
+                      </span>
+                      <FiMaximize2 className="hint-icon" />
+                    </div>
 
                     {/* Luxury Decorative Watermark */}
                     <div className="testimonial-quote-mark" aria-hidden="true">
@@ -418,29 +546,29 @@ export const Testimonials: React.FC = () => {
           </div>
         </div>
 
-        {/* Navigation Controls: Arrows & Indicators */}
+        {/* Navigation Controls: Direction-aware Arrows & Snap Dots */}
         <div className="testimonials-controls">
           {/* Previous Arrow Button */}
           <button
             type="button"
             className="slider-arrow-btn prev-btn"
-            onClick={onManualPrev}
+            onClick={handleManualPrev}
             title={isRTL ? 'التقييم السابق' : 'Previous Testimonial'}
             aria-label={isRTL ? 'التقييم السابق' : 'Previous Testimonial'}
           >
             {isRTL ? <FiChevronRight size={22} /> : <FiChevronLeft size={22} />}
           </button>
 
-          {/* Dots Indicator: 6 original reviews */}
+          {/* Dots Indicator: 6 Reviews */}
           <div className="slider-dots-container" role="tablist">
             {testimonialsData.map((_, dotIdx) => {
-              const isDotActive = dotIdx === (activeNormalizedId - 1);
+              const isDotActive = dotIdx === activeDotIndex;
               return (
                 <button
                   key={dotIdx}
                   type="button"
                   className={`slider-dot-btn ${isDotActive ? 'active' : ''}`}
-                  onClick={() => onSelectDot(dotIdx)}
+                  onClick={() => handleSelectDot(dotIdx)}
                   role="tab"
                   aria-selected={isDotActive}
                   aria-label={`Testimonial ${dotIdx + 1}`}
@@ -453,7 +581,7 @@ export const Testimonials: React.FC = () => {
           <button
             type="button"
             className="slider-arrow-btn next-btn"
-            onClick={onManualNext}
+            onClick={handleManualNext}
             title={isRTL ? 'التقييم التالي' : 'Next Testimonial'}
             aria-label={isRTL ? 'التقييم التالي' : 'Next Testimonial'}
           >
@@ -461,6 +589,102 @@ export const Testimonials: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Full Comment / Review Details Modal Popup (Preserving Comments Functionality) */}
+      {selectedComment && (
+        <div
+          className="comment-modal-backdrop"
+          onClick={() => setSelectedComment(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label={isRTL ? 'تفاصيل التقييم' : 'Review Details'}
+        >
+          <div
+            className="comment-modal-card glass-panel animate-pop-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              type="button"
+              className="comment-modal-close-btn"
+              onClick={() => setSelectedComment(null)}
+              aria-label={isRTL ? 'إغلاق' : 'Close'}
+            >
+              <FiX size={20} />
+            </button>
+
+            {/* Modal Header */}
+            <div className="comment-modal-header">
+              <div className="modal-avatar-frame">
+                <Image
+                  src={selectedComment.avatar}
+                  alt={isRTL ? selectedComment.authorAr : selectedComment.author}
+                  width={68}
+                  height={68}
+                  className="modal-avatar-img"
+                  onError={() => handleAvatarError(selectedComment.id)}
+                />
+                <div className="avatar-gold-ring" />
+              </div>
+
+              <div className="modal-meta-info">
+                <div className="modal-name-row">
+                  <h3 className="modal-author-name">
+                    {isRTL ? selectedComment.authorAr : selectedComment.author}
+                  </h3>
+                  {selectedComment.verified && (
+                    <span className="verified-badge-large">
+                      <FiCheckCircle />
+                      <span>{isRTL ? 'عميل موثق' : 'Verified Client'}</span>
+                    </span>
+                  )}
+                </div>
+                <span className="modal-author-role">
+                  {isRTL ? selectedComment.roleAr : selectedComment.role} •{' '}
+                  {isRTL ? selectedComment.locationAr : selectedComment.location}
+                </span>
+
+                {/* Stars */}
+                <div className="modal-stars-row">
+                  {[...Array(selectedComment.rating)].map((_, i) => (
+                    <FiStar key={i} className="star-filled" size={16} />
+                  ))}
+                  <span className="modal-rating-score">5.0 / 5.0</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-gold-divider" />
+
+            {/* Full Quote */}
+            <div className="comment-modal-body">
+              <p className="modal-full-quote">
+                &ldquo;{isRTL ? selectedComment.quoteAr : selectedComment.quote}&rdquo;
+              </p>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="comment-modal-footer">
+              <div className="modal-purchase-tag">
+                <FiAward className="gold-text" />
+                <span>
+                  {isRTL
+                    ? selectedComment.dateAr || 'شراء موثق • تشكيلة نوفا وير الفاخرة'
+                    : selectedComment.dateEn || 'Verified Purchase • NOVA WEAR Haute Couture'}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                className="btn btn-outline modal-action-btn"
+                onClick={() => setSelectedComment(null)}
+              >
+                {isRTL ? 'إغلاق' : 'Close'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

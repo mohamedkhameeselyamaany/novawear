@@ -39,7 +39,7 @@ export const ScrollToTop: React.FC = () => {
     <button
       type="button"
       onClick={scrollToTop}
-      className={`scroll-to-top-btn ${isVisible ? 'visible' : ''}`}
+      className={`scroll-to-top-btn ${isVisible ? 'visible' : ''} ${isRTL ? 'pos-right' : 'pos-left'}`}
       aria-label={isRTL ? 'العودة إلى أعلى الصفحة' : 'Scroll to top'}
       title={isRTL ? 'العودة إلى أعلى الصفحة' : 'Scroll to top'}
     >

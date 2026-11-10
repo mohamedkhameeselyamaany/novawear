@@ -5,7 +5,6 @@
 .scroll-to-top-btn {
   position: fixed;
   bottom: 2.2rem;
-  right: 2.2rem;
   width: 48px;
   height: 48px;
   border-radius: 50%;
@@ -24,14 +23,26 @@
   transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1),
               visibility 0.35s cubic-bezier(0.16, 1, 0.3, 1),
               transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              right 0.35s ease,
+              left 0.35s ease,
               box-shadow 0.35s ease,
               background 0.35s ease;
   outline: none;
 }
 
-/* RTL Support: Align button to bottom-left in Arabic */
+/* 1. Default & Arabic Mode: Button sits strictly on the RIGHT (الاتجاه اليمين) */
+.scroll-to-top-btn,
+.scroll-to-top-btn.pos-right,
 [dir="rtl"] .scroll-to-top-btn,
 body.lang-ar .scroll-to-top-btn {
+  right: 2.2rem;
+  left: auto;
+}
+
+/* 2. English Mode: Button shifts strictly to the LEFT (الجانب الأيسر / الشمال) */
+.scroll-to-top-btn.pos-left,
+[dir="ltr"] .scroll-to-top-btn,
+body.lang-en .scroll-to-top-btn {
   right: auto;
   left: 2.2rem;
 }
@@ -63,17 +74,25 @@ body.lang-ar .scroll-to-top-btn {
   transform: translateY(-2px);
 }
 
-/* Mobile responsive adjustment */
+/* Mobile responsive adjustments */
 @media (max-width: 768px) {
   .scroll-to-top-btn {
     bottom: 1.5rem;
-    right: 1.25rem;
     width: 44px;
     height: 44px;
   }
 
+  .scroll-to-top-btn,
+  .scroll-to-top-btn.pos-right,
   [dir="rtl"] .scroll-to-top-btn,
   body.lang-ar .scroll-to-top-btn {
+    right: 1.25rem;
+    left: auto;
+  }
+
+  .scroll-to-top-btn.pos-left,
+  [dir="ltr"] .scroll-to-top-btn,
+  body.lang-en .scroll-to-top-btn {
     right: auto;
     left: 1.25rem;
   }
