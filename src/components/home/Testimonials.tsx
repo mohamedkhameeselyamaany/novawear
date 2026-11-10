@@ -149,46 +149,52 @@ export const testimonialsData: Testimonial[] = [
   },
 ];
 
-const TOTAL_CARDS = testimonialsData.length;
-const ANGLE_STEP = 360 / TOTAL_CARDS; // 60 degrees between each card
+const TOTAL_ORIGINAL = testimonialsData.length;
+
+// 4 cloned sets ensure seamless infinite looping in both forward and backward directions
+const EXTENDED_SLIDES = [
+  ...testimonialsData.map((t, idx) => ({ ...t, uniqueKey: `set0-${t.id}-${idx}` })),
+  ...testimonialsData.map((t, idx) => ({ ...t, uniqueKey: `set1-${t.id}-${idx}` })),
+  ...testimonialsData.map((t, idx) => ({ ...t, uniqueKey: `set2-${t.id}-${idx}` })),
+  ...testimonialsData.map((t, idx) => ({ ...t, uniqueKey: `set3-${t.id}-${idx}` })),
+];
+
+const BASE_START_INDEX = TOTAL_ORIGINAL * 2; // Index 12 (start of Set 2)
 
 export const Testimonials: React.FC = () => {
   const { isRTL } = useLanguage();
 
-  // Carousel state
-  const [rotationAngle, setRotationAngle] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
+  // Slider State
+  const [currentIndex, setCurrentIndex] = useState(BASE_START_INDEX);
+  const [isTransitioning, setIsTransitioning] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
   const [isInView, setIsInView] = useState(true);
-  const [stageDimensions, setStageDimensions] = useState({
-    radius: 430,
-    cardWidth: 360,
-    perspective: 1200,
-  });
+  const [visibleCount, setVisibleCount] = useState(3);
+  const [dragOffsetPx, setDragOffsetPx] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
-  // Modal / Full Comment View state
+  // Modal / Full Comment View State
   const [selectedComment, setSelectedComment] = useState<Testimonial | null>(null);
   const [failedAvatars, setFailedAvatars] = useState<Record<number, boolean>>({});
 
-  // Refs for tracking drag & autoplay
+  // Refs
   const sectionRef = useRef<HTMLElement | null>(null);
-  const stageRef = useRef<HTMLDivElement | null>(null);
+  const viewportRef = useRef<HTMLDivElement | null>(null);
   const pointerStartX = useRef<number>(0);
-  const pointerStartAngle = useRef<number>(0);
   const dragDistanceRef = useRef<number>(0);
   const isDraggingRef = useRef<boolean>(false);
   const autoPlayTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Responsive radius, perspective, and card width
+  // Responsive visible count: 3 on desktop, 2 on tablet, 1 on mobile
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
-      if (width < 640) {
-        setStageDimensions({ radius: 210, cardWidth: 290, perspective: 850 });
-      } else if (width < 1024) {
-        setStageDimensions({ radius: 320, cardWidth: 320, perspective: 1050 });
+      if (width < 680) {
+        setVisibleCount(1);
+      } else if (width < 1080) {
+        setVisibleCount(2);
       } else {
-        setStageDimensions({ radius: 430, cardWidth: 360, perspective: 1200 });
+        setVisibleCount(3);
       }
     };
 
@@ -215,7 +221,7 @@ export const Testimonials: React.FC = () => {
     return () => observer.disconnect();
   }, []);
 
-  // Keyboard navigation & Esc key to close comment modal
+  // Esc key listener to close comment modal
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && selectedComment) {
@@ -238,18 +244,59 @@ export const Testimonials: React.FC = () => {
     };
   }, [selectedComment]);
 
-  // Navigation handlers
-  const rotateNext = useCallback(() => {
-    const dir = isRTL ? 1 : -1;
-    setRotationAngle((prev) => prev + dir * ANGLE_STEP);
-  }, [isRTL]);
+  // Infinite Seamless Loop normalization on transition end
+  const handleTransitionEnd = () => {
+    // If we have advanced forward into Set 3 (>= 18), jump back to Set 2 (-6) seamlessly
+    if (currentIndex >= TOTAL_ORIGINAL * 3) {
+      setIsTransitioning(false);
+      setCurrentIndex((prev) => prev - TOTAL_ORIGINAL);
+    }
+    // If we have advanced backward into Set 0 (< 6), jump forward to Set 1 (+6) seamlessly
+    else if (currentIndex < TOTAL_ORIGINAL) {
+      setIsTransitioning(false);
+      setCurrentIndex((prev) => prev + TOTAL_ORIGINAL);
+    }
+  };
 
-  const rotatePrev = useCallback(() => {
-    const dir = isRTL ? -1 : 1;
-    setRotationAngle((prev) => prev + dir * ANGLE_STEP);
-  }, [isRTL]);
+  // Re-enable smooth transition after an instantaneous boundary reset
+  useEffect(() => {
+    if (!isTransitioning) {
+      const raf = requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setIsTransitioning(true);
+        });
+      });
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [isTransitioning]);
 
-  // Autoplay management
+  /**
+   * Navigation directions:
+   * In Arabic: Scrolls automatically from RIGHT to LEFT (من اليمين لليسار) -> step forward (+1)
+   * In English: Scrolls automatically from LEFT to RIGHT (من اليسار لليمين) -> step backward (-1)
+   */
+  const stepForward = useCallback(() => {
+    setIsTransitioning(true);
+    setCurrentIndex((prev) => prev + 1);
+  }, []);
+
+  const stepBackward = useCallback(() => {
+    setIsTransitioning(true);
+    setCurrentIndex((prev) => prev - 1);
+  }, []);
+
+  // Auto-play action according to language requirement
+  const autoPlayStep = useCallback(() => {
+    if (isRTL) {
+      // Arabic: من اليمين لليسار (Right to Left)
+      stepForward();
+    } else {
+      // English: من اليسار لليمين (Left to Right)
+      stepBackward();
+    }
+  }, [isRTL, stepForward, stepBackward]);
+
+  // Premium autoplay timer (2.8 seconds)
   const startAutoPlay = useCallback(() => {
     if (autoPlayTimerRef.current) {
       clearInterval(autoPlayTimerRef.current);
@@ -263,10 +310,10 @@ export const Testimonials: React.FC = () => {
 
     if (!isPaused && isInView && !isDragging && !selectedComment) {
       autoPlayTimerRef.current = setInterval(() => {
-        rotateNext();
-      }, 3500);
+        autoPlayStep();
+      }, 2800);
     }
-  }, [rotateNext, isPaused, isInView, isDragging, selectedComment]);
+  }, [autoPlayStep, isPaused, isInView, isDragging, selectedComment]);
 
   useEffect(() => {
     startAutoPlay();
@@ -277,25 +324,41 @@ export const Testimonials: React.FC = () => {
     };
   }, [startAutoPlay]);
 
-  const handleManualNext = () => {
-    rotateNext();
+  // Manual arrow navigation handlers
+  const onManualNext = () => {
+    if (isRTL) {
+      stepForward();
+    } else {
+      stepBackward();
+    }
     startAutoPlay();
   };
 
-  const handleManualPrev = () => {
-    rotatePrev();
+  const onManualPrev = () => {
+    if (isRTL) {
+      stepBackward();
+    } else {
+      stepForward();
+    }
     startAutoPlay();
   };
 
-  // Pointer / Mouse / Touch Drag Mechanics
+  // Dot selection handler
+  const onSelectDot = (dotIndex: number) => {
+    setIsTransitioning(true);
+    const targetCenterOffset = visibleCount === 3 ? 1 : 0;
+    setCurrentIndex(BASE_START_INDEX + dotIndex - targetCenterOffset);
+    startAutoPlay();
+  };
+
+  // Pointer / Touch Drag Mechanics
   const handlePointerDown = (e: React.PointerEvent) => {
-    // Only respond to main click / touch
     if (e.button !== 0 && e.pointerType === 'mouse') return;
     pointerStartX.current = e.clientX;
-    pointerStartAngle.current = rotationAngle;
     dragDistanceRef.current = 0;
     isDraggingRef.current = false;
     setIsDragging(true);
+    setIsTransitioning(false);
 
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
@@ -313,11 +376,7 @@ export const Testimonials: React.FC = () => {
       isDraggingRef.current = true;
     }
 
-    const stageWidth = stageRef.current?.offsetWidth || 800;
-    const dirFactor = isRTL ? -1 : 1;
-    // Map pixels to degrees smoothly
-    const degChange = (deltaX / stageWidth) * 160 * dirFactor;
-    setRotationAngle(pointerStartAngle.current + degChange);
+    setDragOffsetPx(deltaX);
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
@@ -329,57 +388,51 @@ export const Testimonials: React.FC = () => {
     }
 
     setIsDragging(false);
+    setIsTransitioning(true);
 
-    // If user dragged more than 6px, snap to the nearest 60-degree card angle
-    if (dragDistanceRef.current > 6) {
-      const nearestAngle = Math.round(rotationAngle / ANGLE_STEP) * ANGLE_STEP;
-      setRotationAngle(nearestAngle);
+    const viewportWidth = viewportRef.current?.offsetWidth || 1000;
+    const cardWidthPx = viewportWidth / visibleCount;
+    const dragDelta = dragOffsetPx;
+    setDragOffsetPx(0);
+
+    if (Math.abs(dragDelta) > cardWidthPx * 0.2 || dragDistanceRef.current > 50) {
+      if (dragDelta < 0) {
+        // Dragged left -> advance forward
+        stepForward();
+      } else {
+        // Dragged right -> advance backward
+        stepBackward();
+      }
       startAutoPlay();
-      // Keep isDraggingRef active briefly to suppress accidental card click
+
       setTimeout(() => {
         isDraggingRef.current = false;
-      }, 120);
+      }, 100);
     } else {
       isDraggingRef.current = false;
     }
   };
 
-  // Click on a comment card: View full review comment & snap carousel if needed
-  const handleCardClick = (item: Testimonial, index: number) => {
+  // Card click handler (opens full review modal)
+  const handleCardClick = (item: Testimonial) => {
     if (isDraggingRef.current) return;
-
-    // Calculate how far this card is from the center
-    const cardBaseAngle = index * ANGLE_STEP;
-    const dir = isRTL ? -1 : 1;
-    // Target rotation to bring this card directly to center
-    const currentNearestSteps = Math.round(rotationAngle / ANGLE_STEP);
-    // Find matching angle equivalent
-    const targetAngle = -cardBaseAngle * dir;
-    // Adjust to closest multiple of 360 to prevent large spin
-    const deltaSteps = Math.round((targetAngle - rotationAngle) / 360);
-    const smoothTargetAngle = targetAngle - deltaSteps * 360;
-
-    setRotationAngle(smoothTargetAngle);
     setSelectedComment(item);
-    startAutoPlay();
   };
 
-  // Dot navigation
-  const handleSelectDot = (dotIdx: number) => {
-    const cardBaseAngle = dotIdx * ANGLE_STEP;
-    const dir = isRTL ? -1 : 1;
-    const targetAngle = -cardBaseAngle * dir;
-    const deltaSteps = Math.round((targetAngle - rotationAngle) / 360);
-    const smoothTargetAngle = targetAngle - deltaSteps * 360;
-    setRotationAngle(smoothTargetAngle);
-    startAutoPlay();
-  };
+  // Active card calculation
+  const activeFocusOffset = visibleCount === 3 ? 1 : 0;
+  const activeNormalizedId =
+    (((currentIndex + activeFocusOffset) % TOTAL_ORIGINAL) + TOTAL_ORIGINAL) % TOTAL_ORIGINAL + 1;
 
-  // Determine which card is currently active in the front center
-  const normalizedRotation = ((-rotationAngle % 360) + 360) % 360;
-  const dir = isRTL ? -1 : 1;
-  const activeDotIndex =
-    ((Math.round((rotationAngle * dir) / ANGLE_STEP) % TOTAL_CARDS) + TOTAL_CARDS) % TOTAL_CARDS;
+  // Slide width and transform offset
+  const cardWidthPercent = 100 / visibleCount;
+  const baseOffsetPercent = currentIndex * cardWidthPercent;
+
+  // Apply drag offset in pixels if currently dragging
+  const transformStyle =
+    dragOffsetPx !== 0
+      ? `calc(-${baseOffsetPercent}% + ${dragOffsetPx}px)`
+      : `-${baseOffsetPercent}%`;
 
   const handleAvatarError = (id: number) => {
     setFailedAvatars((prev) => ({ ...prev, [id]: true }));
@@ -388,7 +441,7 @@ export const Testimonials: React.FC = () => {
   return (
     <section
       ref={sectionRef}
-      className="testimonials-section circular-carousel-root"
+      className="testimonials-section regular-slider-root"
       aria-label={isRTL ? 'آراء نخبة عملائنا' : 'Client Testimonials'}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
@@ -405,74 +458,47 @@ export const Testimonials: React.FC = () => {
           <div className="title-gold-bar mx-auto" />
           <p className="testimonials-lead-text">
             {isRTL
-              ? 'شهادات حقيقية من نخبة أصحاب الذوق الرفيع. اسحب للتصفح واضغط على أي تعليق لقراءته بالكامل.'
-              : 'Endorsements from our discerning clientele. Drag to rotate in 3D and click any comment to read full review.'}
+              ? 'شهادات حقيقية من نخبة أصحاب الذوق الرفيع. تقييمات موثقة تعكس فخامة الخامات وجودة التصميم الإيطالي.'
+              : 'Endorsements from our discerning clientele. Verified reviews reflecting bespoke Italian luxury and artisanal craft.'}
           </p>
         </div>
 
-        {/* 3D Circular Carousel Stage */}
+        {/* Regular Side-by-Side Infinite Carousel Viewport */}
         <div
-          ref={stageRef}
-          className={`circular-carousel-stage ${isDragging ? 'is-dragging' : ''}`}
-          style={{ perspective: `${stageDimensions.perspective}px` }}
+          ref={viewportRef}
+          className={`testimonials-viewport ${isDragging ? 'is-dragging' : ''}`}
+          dir="ltr"
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
         >
-          <div className="circular-carousel-cylinder">
-            {testimonialsData.map((item, index) => {
-              // 3D cylindrical geometry calculation
-              const cardBaseAngle = index * ANGLE_STEP;
-              const dirMultiplier = isRTL ? -1 : 1;
-              const currentTotalAngle = cardBaseAngle + rotationAngle * dirMultiplier;
-
-              // Normalize angle into [-180, 180] range relative to camera
-              let relativeAngle = ((currentTotalAngle % 360) + 360) % 360;
-              if (relativeAngle > 180) relativeAngle -= 360;
-
-              const rad = (relativeAngle * Math.PI) / 180;
-              const R = stageDimensions.radius;
-
-              // Cylindrical coordinates
-              const x = Math.sin(rad) * R * dirMultiplier;
-              const z = (Math.cos(rad) - 1) * R; // z <= 0
-              const rotY = relativeAngle * 0.55 * dirMultiplier; // Gentle 3D perspective tilt
-
-              // Continuous depth scaling and opacity
-              const cosVal = Math.cos(rad);
-              const scale = 0.82 + 0.24 * Math.max(0, cosVal); // 1.06 at center, ~0.82 at edge
-              const opacity =
-                Math.abs(relativeAngle) > 130
-                  ? 0
-                  : Math.max(0.2, Math.pow(Math.max(0, cosVal), 1.3));
-              const zIndex = Math.round((cosVal + 1) * 20);
-              const isActive = Math.abs(relativeAngle) < 25;
-              const isPointerDisabled = Math.abs(relativeAngle) > 120;
+          <div
+            className={`testimonials-slider-track ${!isTransitioning ? 'no-transition' : ''}`}
+            style={{ transform: `translateX(${transformStyle})` }}
+            onTransitionEnd={handleTransitionEnd}
+          >
+            {EXTENDED_SLIDES.map((item, idx) => {
+              const isActive =
+                item.id === activeNormalizedId &&
+                Math.abs(idx - (currentIndex + activeFocusOffset)) === 0;
               const hasAvatarFailed = failedAvatars[item.id];
 
               return (
                 <div
-                  key={item.id}
-                  className={`circular-card-wrapper ${isActive ? 'is-active' : ''}`}
-                  style={{
-                    width: `${stageDimensions.cardWidth}px`,
-                    marginLeft: `-${stageDimensions.cardWidth / 2}px`,
-                    transform: `translate3d(${x}px, 0px, ${z}px) rotateY(${rotY}deg) scale(${scale})`,
-                    opacity: opacity,
-                    zIndex: zIndex,
-                    pointerEvents: isPointerDisabled ? 'none' : 'auto',
-                    transition: isDragging
-                      ? 'none'
-                      : 'transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.55s ease',
-                  }}
-                  onClick={() => handleCardClick(item, index)}
-                  role="button"
-                  tabIndex={isActive ? 0 : -1}
-                  aria-label={`${item.author} review - Click to view comment`}
+                  key={item.uniqueKey}
+                  className={`testimonial-slide-col ${isActive ? 'is-active' : ''}`}
+                  style={{ width: `${cardWidthPercent}%` }}
                 >
-                  <article className="testimonial-card glass-panel circular-card-inner">
-                    {/* Top Header: Avatar + Metadata */}
+                  <article
+                    className="testimonial-card glass-panel"
+                    dir={isRTL ? 'rtl' : 'ltr'}
+                    onClick={() => handleCardClick(item)}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`${item.author} review - Click to view full details`}
+                  >
+                    {/* Top Header: Avatar + Meta */}
                     <div className="testimonial-card-header">
                       <div className="testimonial-avatar" aria-hidden="true">
                         {!hasAvatarFailed && (
@@ -483,10 +509,12 @@ export const Testimonials: React.FC = () => {
                             height={54}
                             className="avatar-photo"
                             onError={() => handleAvatarError(item.id)}
-                            priority={item.id <= 3}
+                            priority={idx >= BASE_START_INDEX && idx < BASE_START_INDEX + 3}
                           />
                         )}
-                        <span className={`avatar-initials ${!hasAvatarFailed ? 'fallback-only' : ''}`}>
+                        <span
+                          className={`avatar-initials ${!hasAvatarFailed ? 'fallback-only' : ''}`}
+                        >
                           {item.initials}
                         </span>
                         <div className="avatar-gold-ring" />
@@ -510,24 +538,28 @@ export const Testimonials: React.FC = () => {
                           )}
                         </div>
                         <span className="client-role">
-                          {isRTL ? item.roleAr : item.role} • {isRTL ? item.locationAr : item.location}
+                          {isRTL ? item.roleAr : item.role} •{' '}
+                          {isRTL ? item.locationAr : item.location}
                         </span>
                       </div>
                     </div>
 
                     {/* Star Rating */}
-                    <div className="testimonial-stars" aria-label={`${item.rating} out of 5 stars`}>
+                    <div
+                      className="testimonial-stars"
+                      aria-label={`${item.rating} out of 5 stars`}
+                    >
                       {[...Array(item.rating)].map((_, i) => (
                         <FiStar key={i} className="star-filled" />
                       ))}
                     </div>
 
-                    {/* Review Quote Snippet */}
+                    {/* Quote Text */}
                     <p className="testimonial-quote">
                       &ldquo;{isRTL ? item.quoteAr : item.quote}&rdquo;
                     </p>
 
-                    {/* Interactive Click-to-view Action Hint */}
+                    {/* Interactive Action Hint */}
                     <div className="card-action-hint">
                       <span className="hint-text">
                         {isRTL ? 'اضغط لعرض التقييم بالكامل' : 'Click to view full review'}
@@ -535,7 +567,7 @@ export const Testimonials: React.FC = () => {
                       <FiMaximize2 className="hint-icon" />
                     </div>
 
-                    {/* Luxury Decorative Watermark */}
+                    {/* Luxury Decorative Watermark Quote Mark */}
                     <div className="testimonial-quote-mark" aria-hidden="true">
                       &rdquo;
                     </div>
@@ -546,29 +578,29 @@ export const Testimonials: React.FC = () => {
           </div>
         </div>
 
-        {/* Navigation Controls: Direction-aware Arrows & Snap Dots */}
+        {/* Navigation Controls: Arrows & Indicators */}
         <div className="testimonials-controls">
           {/* Previous Arrow Button */}
           <button
             type="button"
             className="slider-arrow-btn prev-btn"
-            onClick={handleManualPrev}
+            onClick={onManualPrev}
             title={isRTL ? 'التقييم السابق' : 'Previous Testimonial'}
             aria-label={isRTL ? 'التقييم السابق' : 'Previous Testimonial'}
           >
             {isRTL ? <FiChevronRight size={22} /> : <FiChevronLeft size={22} />}
           </button>
 
-          {/* Dots Indicator: 6 Reviews */}
+          {/* Dots Indicator: 6 original reviews */}
           <div className="slider-dots-container" role="tablist">
             {testimonialsData.map((_, dotIdx) => {
-              const isDotActive = dotIdx === activeDotIndex;
+              const isDotActive = dotIdx === activeNormalizedId - 1;
               return (
                 <button
                   key={dotIdx}
                   type="button"
                   className={`slider-dot-btn ${isDotActive ? 'active' : ''}`}
-                  onClick={() => handleSelectDot(dotIdx)}
+                  onClick={() => onSelectDot(dotIdx)}
                   role="tab"
                   aria-selected={isDotActive}
                   aria-label={`Testimonial ${dotIdx + 1}`}
@@ -581,7 +613,7 @@ export const Testimonials: React.FC = () => {
           <button
             type="button"
             className="slider-arrow-btn next-btn"
-            onClick={handleManualNext}
+            onClick={onManualNext}
             title={isRTL ? 'التقييم التالي' : 'Next Testimonial'}
             aria-label={isRTL ? 'التقييم التالي' : 'Next Testimonial'}
           >
@@ -590,7 +622,7 @@ export const Testimonials: React.FC = () => {
         </div>
       </div>
 
-      {/* Full Comment / Review Details Modal Popup (Preserving Comments Functionality) */}
+      {/* Full Comment / Review Details Modal Popup */}
       {selectedComment && (
         <div
           className="comment-modal-backdrop"
@@ -600,7 +632,8 @@ export const Testimonials: React.FC = () => {
           aria-label={isRTL ? 'تفاصيل التقييم' : 'Review Details'}
         >
           <div
-            className="comment-modal-card glass-panel animate-pop-in"
+            className="comment-modal-card glass-panel"
+            dir={isRTL ? 'rtl' : 'ltr'}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}

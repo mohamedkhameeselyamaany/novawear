@@ -1,8 +1,8 @@
 /* ==========================================================================
-   NOVA WEAR — Circular 3D Carousel & Luxury Testimonials
+   NOVA WEAR — Luxury Side-by-Side Testimonials Infinite Carousel
    ========================================================================== */
 
-.testimonials-section.circular-carousel-root {
+.testimonials-section.regular-slider-root {
   padding: 6.5rem 0 5.5rem 0;
   position: relative;
   overflow: hidden;
@@ -22,73 +22,52 @@
 }
 
 /* ==========================================================================
-   3D Circular Carousel Stage & Cylinder
+   Viewport & Continuous Infinite Slider Track
    ========================================================================== */
 
-.circular-carousel-stage {
-  position: relative;
+.testimonials-viewport {
   width: 100%;
-  height: 520px;
-  margin: 1.5rem auto 2.2rem auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  perspective: 1200px;
-  -webkit-perspective: 1200px;
-  touch-action: pan-y;
+  overflow: hidden;
+  padding: 2.2rem 0 2.8rem 0;
+  position: relative;
   user-select: none;
   -webkit-user-select: none;
   cursor: grab;
+  touch-action: pan-y;
 }
 
-.circular-carousel-stage.is-dragging {
+.testimonials-viewport.is-dragging {
   cursor: grabbing;
 }
 
-.circular-carousel-cylinder {
-  position: relative;
-  width: 100%;
-  height: 100%;
+.testimonials-slider-track {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  transform-style: preserve-3d;
-  -webkit-transform-style: preserve-3d;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform;
 }
 
-/* ==========================================================================
-   Circular 3D Card Wrapper & Anchor
-   ========================================================================== */
-
-.circular-card-wrapper {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  margin-top: -160px;
-  transform-origin: center center;
-  transform-style: preserve-3d;
-  -webkit-transform-style: preserve-3d;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  cursor: pointer;
-  outline: none;
+.testimonials-slider-track.no-transition {
+  transition: none !important;
 }
 
-.circular-card-wrapper:focus-visible {
-  outline: 2px solid var(--primary-gold, #C8A963);
-  outline-offset: 4px;
+/* Slide Column (Side-by-Side Cards) */
+.testimonial-slide-col {
+  flex: 0 0 auto;
+  padding: 0 0.85rem;
+  box-sizing: border-box;
 }
 
 /* ==========================================================================
    Luxury Testimonial Card Styling
    ========================================================================== */
 
-.testimonial-card.circular-card-inner {
-  width: 100%;
+.testimonial-card {
+  height: 100%;
   min-height: 310px;
-  padding: 2.2rem 2rem 1.6rem 2rem;
-  border-radius: 18px;
+  padding: 2.2rem 2rem 1.8rem 2rem;
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -96,44 +75,62 @@
   overflow: hidden;
   background: var(--card-bg, rgba(18, 18, 18, 0.88));
   border: 1px solid var(--border-gold, rgba(200, 169, 99, 0.22));
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.45);
-  transition: border-color 0.4s ease,
-              box-shadow 0.4s ease,
-              transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-              background 0.4s ease;
-  will-change: transform, box-shadow;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  transform: scale(0.97);
+  opacity: 0.88;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.45s ease;
+  cursor: pointer;
+  outline: none;
 }
 
-body.light-mode .testimonial-card.circular-card-inner {
+.testimonial-card:focus-visible {
+  outline: 2px solid var(--primary-gold, #C8A963);
+  outline-offset: 3px;
+}
+
+body.light-mode .testimonial-card {
   background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.08);
-  border-color: rgba(168, 134, 64, 0.24);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  border-color: rgba(168, 134, 64, 0.22);
 }
 
-/* Active Center Card Highlight & Depth */
-.circular-card-wrapper.is-active .testimonial-card.circular-card-inner {
+/* Active Center Card Highlight & Zoom (Scale 1.05) */
+.testimonial-slide-col.is-active .testimonial-card {
+  transform: scale(1.05);
+  opacity: 1;
   border-color: rgba(200, 169, 99, 0.7);
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65), 0 0 32px rgba(200, 169, 99, 0.35);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.55), 0 0 30px rgba(200, 169, 99, 0.32);
   background: rgba(22, 21, 20, 0.94);
+  z-index: 3;
 }
 
-body.light-mode .circular-card-wrapper.is-active .testimonial-card.circular-card-inner {
+body.light-mode .testimonial-slide-col.is-active .testimonial-card {
   background: rgba(255, 255, 255, 0.99);
-  border-color: rgba(168, 134, 64, 0.6);
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12), 0 0 26px rgba(168, 134, 64, 0.25);
+  border-color: rgba(168, 134, 64, 0.55);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12), 0 0 24px rgba(168, 134, 64, 0.22);
 }
 
 /* Card Hover Elevation */
-.testimonial-card.circular-card-inner:hover {
-  transform: translateY(-5px);
+.testimonial-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  opacity: 1;
   border-color: rgba(200, 169, 99, 0.85);
-  box-shadow: 0 24px 52px rgba(0, 0, 0, 0.7), 0 0 36px rgba(200, 169, 99, 0.42);
+  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.65), 0 0 35px rgba(200, 169, 99, 0.4);
+  z-index: 4;
 }
 
-body.light-mode .testimonial-card.circular-card-inner:hover {
-  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.14), 0 0 28px rgba(168, 134, 64, 0.3);
+.testimonial-slide-col.is-active .testimonial-card:hover {
+  transform: translateY(-6px) scale(1.07);
+  box-shadow: 0 24px 55px rgba(0, 0, 0, 0.7), 0 0 40px rgba(200, 169, 99, 0.48);
+}
+
+body.light-mode .testimonial-card:hover {
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12), 0 0 26px rgba(168, 134, 64, 0.26);
 }
 
 /* ==========================================================================
@@ -305,10 +302,7 @@ body.light-mode .testimonial-quote {
   left: 1.25rem;
 }
 
-/* ==========================================================================
-   Card Interactive Action Hint (Click to read comment)
-   ========================================================================== */
-
+/* Card Interactive Action Hint */
 .card-action-hint {
   display: flex;
   align-items: center;
@@ -325,7 +319,7 @@ body.light-mode .testimonial-quote {
 }
 
 .testimonial-card:hover .card-action-hint,
-.circular-card-wrapper.is-active .card-action-hint {
+.testimonial-slide-col.is-active .card-action-hint {
   opacity: 1;
   color: #DFBF86;
 }
@@ -348,7 +342,7 @@ body.light-mode .testimonial-quote {
   align-items: center;
   justify-content: center;
   gap: 1.8rem;
-  margin-top: 0.5rem;
+  margin-top: 1.5rem;
   position: relative;
   z-index: 10;
 }
@@ -414,7 +408,7 @@ body.light-mode .slider-arrow-btn {
 }
 
 /* ==========================================================================
-   Full Comment / Review Details Modal Popup (Preserved Comments Feature)
+   Full Comment / Review Details Modal Popup
    ========================================================================== */
 
 .comment-modal-backdrop {
@@ -639,7 +633,9 @@ body.light-mode .comment-modal-footer {
    ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
-  .circular-card-wrapper,
+  .testimonials-slider-track {
+    transition: none !important;
+  }
   .testimonial-card,
   .slider-arrow-btn,
   .slider-dot-btn,
@@ -655,30 +651,20 @@ body.light-mode .comment-modal-footer {
    ========================================================================== */
 
 @media (max-width: 1024px) {
-  .circular-carousel-stage {
-    height: 480px;
-  }
-  .circular-card-wrapper {
-    margin-top: -150px;
-  }
-  .testimonial-card.circular-card-inner {
+  .testimonial-card {
     min-height: 290px;
     padding: 1.8rem 1.6rem;
   }
 }
 
 @media (max-width: 768px) {
-  .testimonials-section.circular-carousel-root {
+  .testimonials-section.regular-slider-root {
     padding: 4.5rem 0 3.5rem 0;
   }
-  .circular-carousel-stage {
-    height: 440px;
-    margin: 1rem auto 1.5rem auto;
+  .testimonials-viewport {
+    padding: 1.5rem 0 2rem 0;
   }
-  .circular-card-wrapper {
-    margin-top: -140px;
-  }
-  .testimonial-card.circular-card-inner {
+  .testimonial-card {
     min-height: 275px;
     padding: 1.6rem 1.35rem 1.3rem 1.35rem;
   }
@@ -696,13 +682,7 @@ body.light-mode .comment-modal-footer {
 }
 
 @media (max-width: 480px) {
-  .circular-carousel-stage {
-    height: 410px;
-  }
-  .circular-card-wrapper {
-    margin-top: -130px;
-  }
-  .testimonial-card.circular-card-inner {
+  .testimonial-card {
     min-height: 260px;
     padding: 1.4rem 1.15rem 1.2rem 1.15rem;
   }
